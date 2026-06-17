@@ -1,5 +1,6 @@
-import { openDB, DBSchema, IDBPDatabase } from 'idb';
-import { ParteGeonumerico } from './types';
+import { openDB } from 'idb';
+import type { DBSchema, IDBPDatabase } from 'idb';
+import type { ParteGeonumerico } from './types';
 
 interface PartePersonalDB extends DBSchema {
   partes: {
@@ -62,7 +63,7 @@ export async function obtenerPartesHoy() {
   });
 }
 
-export async function obtenerTodosPar tes() {
+export async function obtenerTodosPartes() {
   if (!db) await initDB();
   return await db.getAll('partes');
 }

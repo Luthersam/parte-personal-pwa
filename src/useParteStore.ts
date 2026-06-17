@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Cuarteto, ParteStore, NovedadesData } from './types';
+import type { Cuarteto, ParteStore, NovedadesData } from './types';
 
 const CATEGORIAS = [
   { id: 'com', label: 'COMISIÓN' },
@@ -181,7 +181,7 @@ export function useParteStore() {
     });
   }, []);
 
-  const obtenerTotales = useCallback() => {
+  const obtenerTotales = useCallback(() => {
     const novedades: Cuarteto = {
       of: store.comision.of + store.excusado.of + store.franquicia.of + store.permiso.of + store.vacaciones.of + store.servicios.of + store.retardado.of + store.horarioFlexible.of + store.otros.of,
       sub: store.comision.sub + store.excusado.sub + store.franquicia.sub + store.permiso.sub + store.vacaciones.sub + store.servicios.sub + store.retardado.sub + store.horarioFlexible.sub + store.otros.sub,

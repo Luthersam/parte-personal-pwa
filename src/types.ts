@@ -1,81 +1,55 @@
-/**
- * @fileoverview Types for the plugin-kit package.
- * @author Nicholas C. Zakas
- */
-
-//------------------------------------------------------------------------------
-// Imports
-//------------------------------------------------------------------------------
-
-import type {
-	RuleDefinition,
-	RuleDefinitionTypeOptions,
-	RuleVisitor,
-} from "@eslint/core";
-
-//------------------------------------------------------------------------------
-// Exports
-//------------------------------------------------------------------------------
-
-/**
- * Defaults for non-language-related `RuleDefinition` options.
- */
-export interface CustomRuleTypeDefinitions {
-	RuleOptions: unknown[];
-	MessageIds: string;
-	ExtRuleDocs: Record<string, unknown>;
+export interface Cuarteto {
+  of: number;
+  sub: number;
+  pt: number;
+  axp: number;
 }
 
-/**
- * A helper type to define language specific specializations of the `RuleDefinition` type.
- *
- * @example
- * ```ts
- * type YourRuleDefinition<
- * 	Options extends Partial<CustomRuleTypeDefinitions> = {},
- * > = CustomRuleDefinitionType<
- * 	{
- * 		LangOptions: YourLanguageOptions;
- * 		Code: YourSourceCode;
- * 		Visitor: YourRuleVisitor;
- * 		Node: YourNode;
- * 	},
- * 	Options
- * >;
- * ```
- */
-export type CustomRuleDefinitionType<
-	LanguageSpecificOptions extends Omit<
-		RuleDefinitionTypeOptions,
-		keyof CustomRuleTypeDefinitions
-	>,
-	Options extends Partial<CustomRuleTypeDefinitions>,
-> = RuleDefinition<
-	// Language specific type options (non-configurable)
-	LanguageSpecificOptions &
-		Required<
-			// Rule specific type options (custom)
-			Options &
-				// Rule specific type options (defaults)
-				Omit<CustomRuleTypeDefinitions, keyof Options>
-		>
->;
+export interface NovedadesData {
+  [categoria: string]: {
+    nombres: string[];
+    of: number;
+    sub: number;
+    pt: number;
+    axp: number;
+  };
+}
 
-/**
- * Adds matching `:exit` selector properties for each key of a `RuleVisitor`.
- */
-export type CustomRuleVisitorWithExit<RuleVisitorType extends RuleVisitor> = {
-	[Key in keyof RuleVisitorType as
-		| Key
-		| `${Key & string}:exit`]: RuleVisitorType[Key];
-};
+export interface ParteGeonumerico {
+  id?: number;
+  titulo: string;
+  fecha: Date;
+  unidadNombre: string;
 
-/**
- * A map of names to string values, or `null` when no value is provided.
- */
-export type StringConfig = Record<string, string | null>;
+  ef_of: number;
+  ef_sub: number;
+  ef_pt: number;
+  ef_axp: number;
 
-/**
- * A map of names to boolean flags.
- */
-export type BooleanConfig = Record<string, boolean>;
+  nov_total_of: number;
+  nov_total_sub: number;
+  nov_total_pt: number;
+  nov_total_axp: number;
+
+  elaboradoPor: string;
+  novedadesJSON: string;
+}
+
+export interface ParteStore {
+  unidadNombre: string;
+  unidadPadre: string;
+  elaboradoPor: string;
+
+  ef: Cuarteto;
+  comision: Cuarteto;
+  excusado: Cuarteto;
+  franquicia: Cuarteto;
+  permiso: Cuarteto;
+  vacaciones: Cuarteto;
+  servicios: Cuarteto;
+  retardado: Cuarteto;
+  horarioFlexible: Cuarteto;
+  otros: Cuarteto;
+
+  nombresDict: { [key: string]: string[] };
+}

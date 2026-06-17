@@ -5,7 +5,7 @@ import { MonitorConsolidado } from './components/MonitorConsolidado';
 import { FormularioDetallado } from './components/FormularioDetallado';
 import { useParteStore } from './useParteStore';
 import { obtenerPartesHoy, guardarParte, borrarPartesHoy, initDB, obtenerPartePorUnidad } from './db';
-import { ParteGeonumerico, Cuarteto } from './types';
+import type { ParteGeonumerico, Cuarteto } from './types';
 
 function App() {
   const store = useParteStore();

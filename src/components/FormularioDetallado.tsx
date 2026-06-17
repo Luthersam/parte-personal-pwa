@@ -1,6 +1,6 @@
-import React from 'react';
+import { useState } from 'react';
+import type { Cuarteto } from '../types';
 import { CajaDigito } from './CajaDigito';
-import { Cuarteto } from '../types';
 
 interface Props {
   unidadNombre: string;
@@ -12,6 +12,8 @@ interface Props {
   permiso: Cuarteto;
   vacaciones: Cuarteto;
   servicios: Cuarteto;
+  retardado: Cuarteto;
+  horarioFlexible: Cuarteto;
   otros: Cuarteto;
   nombresDict: { [key: string]: string[] };
   onUnidadChange: (value: string) => void;
@@ -51,8 +53,8 @@ export function FormularioDetallado({
   onAddNombre,
   onRemoveNombre,
 }: Props) {
-  const [expandedCategory, setExpandedCategory] = React.useState<string | null>(null);
-  const [newNombre, setNewNombre] = React.useState<{ [key: string]: string }>({});
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  const [newNombre, setNewNombre] = useState<{ [key: string]: string }>({});
 
   const cuartetosMap: { [key: string]: Cuarteto } = {
     com: comision,
