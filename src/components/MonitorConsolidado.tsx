@@ -1,5 +1,4 @@
-import React from 'react';
-import { Cuarteto } from '../types';
+import type { Cuarteto } from '../types';
 
 interface Props {
   ef: Cuarteto;
@@ -19,25 +18,51 @@ export function MonitorConsolidado({ ef, novedades }: Props) {
   const totalDisp = disponible.of + disponible.sub + disponible.pt + disponible.axp;
 
   return (
-    <div className="monitor monitor--consolidado">
+    <div className="monitor--consolidado">
       <div className="monitor__title">CONSOLIDADO DEL DÍA (TODAS LAS UNIDADES)</div>
 
-      <div className="monitor__grid">
-        <div className="monitor__item">
-          <div className="monitor__label">EFECTIVA</div>
-          <div className="monitor__value">{totalEf}</div>
-        </div>
-
-        <div className="monitor__item">
-          <div className="monitor__label">DISPONIBLE</div>
-          <div className="monitor__value monitor__value--highlight">{totalDisp}</div>
-        </div>
-
-        <div className="monitor__item">
-          <div className="monitor__label">NOVEDADES</div>
-          <div className="monitor__value monitor__value--warning">{totalNov}</div>
-        </div>
-      </div>
+      <table className="monitor-tabla">
+        <thead>
+          <tr>
+            <th></th>
+            <th>EFECTIVA</th>
+            <th>FORMANDO</th>
+            <th>NOVEDADES</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>OF</td>
+            <td className="val-ef">{ef.of}</td>
+            <td className="val-form">{disponible.of}</td>
+            <td className="val-nov">{novedades.of}</td>
+          </tr>
+          <tr>
+            <td>SUB</td>
+            <td className="val-ef">{ef.sub}</td>
+            <td className="val-form">{disponible.sub}</td>
+            <td className="val-nov">{novedades.sub}</td>
+          </tr>
+          <tr>
+            <td>PT</td>
+            <td className="val-ef">{ef.pt}</td>
+            <td className="val-form">{disponible.pt}</td>
+            <td className="val-nov">{novedades.pt}</td>
+          </tr>
+          <tr>
+            <td>AXP</td>
+            <td className="val-ef">{ef.axp}</td>
+            <td className="val-form">{disponible.axp}</td>
+            <td className="val-nov">{novedades.axp}</td>
+          </tr>
+          <tr className="total-row">
+            <td>TOT</td>
+            <td className="val-ef">{totalEf}</td>
+            <td className="val-form">{totalDisp}</td>
+            <td className="val-nov">{totalNov}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 }

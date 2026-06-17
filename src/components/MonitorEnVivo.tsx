@@ -1,5 +1,4 @@
-import React from 'react';
-import { Cuarteto } from '../types';
+import type { Cuarteto } from '../types';
 
 interface Props {
   ef: Cuarteto;
@@ -19,23 +18,32 @@ export function MonitorEnVivo({ ef, novedades }: Props) {
   const totalDisp = disponible.of + disponible.sub + disponible.pt + disponible.axp;
 
   return (
-    <div className="monitor monitor--vivo">
+    <div className="monitor--vivo">
       <div className="monitor__title">UNIDAD ACTUAL - EN VIVO</div>
 
       <div className="monitor__grid">
         <div className="monitor__item">
           <div className="monitor__label">EFECTIVA</div>
           <div className="monitor__value">{totalEf}</div>
+          <div className="monitor__breakdown">
+            OF:{ef.of} SUB:{ef.sub} PT:{ef.pt} AXP:{ef.axp}
+          </div>
         </div>
 
         <div className="monitor__item">
-          <div className="monitor__label">DISPONIBLE</div>
+          <div className="monitor__label">FORMANDO</div>
           <div className="monitor__value monitor__value--highlight">{totalDisp}</div>
+          <div className="monitor__breakdown">
+            OF:{disponible.of} SUB:{disponible.sub} PT:{disponible.pt} AXP:{disponible.axp}
+          </div>
         </div>
 
         <div className="monitor__item">
           <div className="monitor__label">NOVEDADES</div>
           <div className="monitor__value monitor__value--warning">{totalNov}</div>
+          <div className="monitor__breakdown">
+            OF:{novedades.of} SUB:{novedades.sub} PT:{novedades.pt} AXP:{novedades.axp}
+          </div>
         </div>
       </div>
     </div>

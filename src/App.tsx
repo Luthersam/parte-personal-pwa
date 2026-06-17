@@ -1,11 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import './styles.css';
 import { MonitorEnVivo } from './components/MonitorEnVivo';
 import { MonitorConsolidado } from './components/MonitorConsolidado';
 import { FormularioDetallado } from './components/FormularioDetallado';
 import { useParteStore } from './useParteStore';
 import { obtenerPartesHoy, guardarParte, borrarPartesHoy, initDB, obtenerPartePorUnidad } from './db';
-import type { ParteGeonumerico, Cuarteto } from './types';
+import type { ParteGeonumerico, Cuarteto, NovedadesData } from './types';
+
+const CATEGORIAS_LABELS = [
+  'COMISIÓN',
+  'EXCUSADO SERVICIO',
+  'FRANQUICIA',
+  'PERMISO',
+  'VACACIONES',
+  'SERVICIOS',
+  'RETARDADO',
+  'HORARIO FLEXIBLE',
+  'OTROS',
+];
 
 function App() {
   const store = useParteStore();
@@ -13,7 +25,6 @@ function App() {
   const [error, setError] = useState('');
   const [showReporte, setShowReporte] = useState(false);
 
-  // Inicializar DB
   useEffect(() => {
     initDB().then(() => cargarPartesHoy());
   }, []);
@@ -21,10 +32,7 @@ function App() {
   const cargarPartesHoy = async () => {
     try {
       const partes = await obtenerPartesHoy();
-      setPartesHoy(partes.map((p) => ({
-        ...p,
-        fecha: new Date(p.fecha),
-      })));
+      setPartesHoy(partes.map((p) => ({ ...p, fecha: new Date(p.fecha) })));
     } catch (err) {
       console.error('Error cargando partes:', err);
     }
@@ -39,7 +47,6 @@ function App() {
       ef.sub += parte.ef_sub;
       ef.pt += parte.ef_pt;
       ef.axp += parte.ef_axp;
-
       novedades.of += parte.nov_total_of;
       novedades.sub += parte.nov_total_sub;
       novedades.pt += parte.nov_total_pt;
@@ -51,8 +58,12 @@ function App() {
 
   const validar = () => {
     const totales = store.obtenerTotales();
-    if (totales.disponible.of < 0 || totales.disponible.sub < 0 ||
-        totales.disponible.pt < 0 || totales.disponible.axp < 0) {
+    if (
+      totales.disponible.of < 0 ||
+      totales.disponible.sub < 0 ||
+      totales.disponible.pt < 0 ||
+      totales.disponible.axp < 0
+    ) {
       setError('Las novedades superan la Fuerza Efectiva.');
       return false;
     }
@@ -104,7 +115,6 @@ function App() {
           ef: { of: parte.ef_of, sub: parte.ef_sub, pt: parte.ef_pt, axp: parte.ef_axp },
           elaboradoPor: parte.elaboradoPor,
         });
-
         const novedades = JSON.parse(parte.novedadesJSON || '{}');
         store.cargarDesdeDict(novedades);
       }
@@ -124,6 +134,10 @@ function App() {
     }
   };
 
+  const esActualizacion = partesHoy.some(
+    (p) => p.unidadNombre.toUpperCase() === store.store.unidadNombre.toUpperCase()
+  );
+
   const consolidado = totalesConsolidado();
   const totales = store.obtenerTotales();
 
@@ -131,7 +145,7 @@ function App() {
     <div className="app">
       <div className="app__header">
         <h1>PARTE DE PERSONAL</h1>
-        <p style={{ fontSize: '12px', margin: '4px 0 0' }}>
+        <p style={{ fontSize: '10px', margin: '1px 0 0', color: 'rgba(0,0,0,0.65)' }}>
           Policía Nacional de Colombia
         </p>
       </div>
@@ -139,29 +153,20 @@ function App() {
       <div className="app__content">
         <MonitorEnVivo ef={store.store.ef} novedades={totales.novedades} />
 
-        <div className="button-group">
-          <button
-            onClick={guardar}
-            className="btn btn--success"
-            title={
-              partesHoy.some((p) => p.unidadNombre.toUpperCase() === store.store.unidadNombre.toUpperCase())
-                ? 'Actualizar'
-                : 'Guardar'
-            }
+        {error && (
+          <div
+            style={{
+              background: 'rgba(255,0,0,0.15)',
+              padding: '8px 12px',
+              borderRadius: '4px',
+              marginBottom: '10px',
+              color: '#ff6666',
+              fontSize: '12px',
+            }}
           >
-            {partesHoy.some((p) => p.unidadNombre.toUpperCase() === store.store.unidadNombre.toUpperCase())
-              ? '↻ ACTUALIZAR'
-              : '✓ GUARDAR'}
-          </button>
-          <button onClick={() => setShowReporte(true)} className="btn btn--primary">
-            📋 REPORTE
-          </button>
-          <button onClick={limpiarHoy} className="btn btn--danger">
-            🗑 LIMPIAR
-          </button>
-        </div>
-
-        {error && <div style={{ background: 'rgba(255,0,0,0.2)', padding: '10px', borderRadius: '4px', marginBottom: '10px', color: '#ff6666' }}>{error}</div>}
+            {error}
+          </div>
+        )}
 
         <FormularioDetallado
           unidadNombre={store.store.unidadNombre}
@@ -185,10 +190,22 @@ function App() {
           onRemoveNombre={store.removeNombre}
         />
 
-        <hr className="formulario__divider" style={{ marginTop: '16px' }} />
+        <div className="button-group">
+          <button onClick={guardar} className="btn btn--success">
+            {esActualizacion ? '↻ ACTUALIZAR' : '✓ GUARDAR'}
+          </button>
+          <button onClick={() => setShowReporte(true)} className="btn btn--primary">
+            📋 REPORTE
+          </button>
+          <button onClick={limpiarHoy} className="btn btn--danger">
+            🗑 LIMPIAR
+          </button>
+        </div>
+
+        <hr className="formulario__divider" style={{ marginTop: '8px' }} />
 
         {partesHoy.length > 0 && (
-          <div style={{ marginTop: '16px' }}>
+          <div style={{ marginTop: '12px' }}>
             <h3 style={{ fontSize: '11px', fontWeight: 700, marginBottom: '8px', color: '#c8a000' }}>
               UNIDADES REGISTRADAS HOY
             </h3>
@@ -215,20 +232,22 @@ function App() {
           </div>
         )}
 
-        {showReporte && (
-          <ReporteModal
-            partesHoy={partesHoy}
-            consolidado={consolidado}
-            elaboradoPor={store.store.elaboradoPor}
-            unidadPadre={store.store.unidadPadre}
-            onClose={() => setShowReporte(false)}
-          />
-        )}
-
-        <div style={{ marginBottom: '40px' }} />
+        <div style={{ marginBottom: '24px' }} />
 
         <MonitorConsolidado ef={consolidado.ef} novedades={consolidado.novedades} />
+
+        <div style={{ marginBottom: '40px' }} />
       </div>
+
+      {showReporte && (
+        <ReporteModal
+          partesHoy={partesHoy}
+          consolidado={consolidado}
+          elaboradoPor={store.store.elaboradoPor}
+          unidadPadre={store.store.unidadPadre}
+          onClose={() => setShowReporte(false)}
+        />
+      )}
     </div>
   );
 }
@@ -246,134 +265,254 @@ function ReporteModal({
   unidadPadre: string;
   onClose: () => void;
 }) {
-  const [padreInput, setPadreInput] = useState(unidadPadre);
+  const [padreInput, setPadreInput] = useState(unidadPadre || '');
+
+  const disp = {
+    of: consolidado.ef.of - consolidado.novedades.of,
+    sub: consolidado.ef.sub - consolidado.novedades.sub,
+    pt: consolidado.ef.pt - consolidado.novedades.pt,
+    axp: consolidado.ef.axp - consolidado.novedades.axp,
+  };
+
+  const fecha = new Date();
+  const fechaStr = fecha.toLocaleDateString('es-CO', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+  const horaStr = fecha.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+
+  // Construir relación de personal por categoría a partir de todos los partes
+  const relacionPersonal: { [categoria: string]: { nombre: string; unidad: string }[] } = {};
+
+  for (const categoria of CATEGORIAS_LABELS) {
+    relacionPersonal[categoria] = [];
+  }
+
+  for (const parte of partesHoy) {
+    try {
+      const novedades: NovedadesData = JSON.parse(parte.novedadesJSON || '{}');
+      for (const [categoria, data] of Object.entries(novedades)) {
+        if (data.nombres && data.nombres.length > 0) {
+          if (!relacionPersonal[categoria]) relacionPersonal[categoria] = [];
+          for (const nombre of data.nombres) {
+            relacionPersonal[categoria].push({ nombre, unidad: parte.unidadNombre });
+          }
+        }
+      }
+    } catch {
+      // skip invalid JSON
+    }
+  }
+
+  const categoriasConPersonal = CATEGORIAS_LABELS.filter(
+    (c) => relacionPersonal[c] && relacionPersonal[c].length > 0
+  );
+
+  const enviarWhatsApp = () => {
+    const ef = consolidado.ef;
+    const nov = consolidado.novedades;
+    const unidadTitulo = padreInput || 'CONSOLIDADO';
+
+    let texto = `*PARTE DE PERSONAL - ${unidadTitulo}*\n`;
+    texto += `Fecha: ${fechaStr} ${horaStr}\n\n`;
+
+    texto += `*RESUMEN GENERAL*\n`;
+    texto += `T. EFECTIVA:  OF ${ef.of} | SUB ${ef.sub} | PT ${ef.pt} | AXP ${ef.axp}\n`;
+    texto += `T. NOVEDADES: OF ${nov.of} | SUB ${nov.sub} | PT ${nov.pt} | AXP ${nov.axp}\n`;
+    texto += `T. FORMANDO:  OF ${disp.of} | SUB ${disp.sub} | PT ${disp.pt} | AXP ${disp.axp}\n\n`;
+
+    if (categoriasConPersonal.length > 0) {
+      texto += `*RELACIÓN DE PERSONAL POR NOVEDAD*\n`;
+      for (const cat of categoriasConPersonal) {
+        texto += `\n_${cat}_\n`;
+        for (const p of relacionPersonal[cat]) {
+          texto += `• ${p.nombre} (${p.unidad})\n`;
+        }
+      }
+      texto += '\n';
+    }
+
+    texto += `*DESGLOSE POR UNIDADES*\n`;
+    for (const parte of partesHoy) {
+      const dispParte = {
+        of: parte.ef_of - parte.nov_total_of,
+        sub: parte.ef_sub - parte.nov_total_sub,
+        pt: parte.ef_pt - parte.nov_total_pt,
+        axp: parte.ef_axp - parte.nov_total_axp,
+      };
+      texto += `\n${parte.unidadNombre.toUpperCase()}\n`;
+      texto += `EF: OF ${parte.ef_of} | SUB ${parte.ef_sub} | PT ${parte.ef_pt} | AXP ${parte.ef_axp}\n`;
+      texto += `NOV: OF ${parte.nov_total_of} | SUB ${parte.nov_total_sub} | PT ${parte.nov_total_pt} | AXP ${parte.nov_total_axp}\n`;
+      texto += `FORM: OF ${dispParte.of} | SUB ${dispParte.sub} | PT ${dispParte.pt} | AXP ${dispParte.axp}\n`;
+    }
+
+    if (elaboradoPor) {
+      texto += `\n_Elaboró: ${elaboradoPor.toUpperCase()}_`;
+    }
+
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
+  };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-      <div style={{ background: '#fff', borderRadius: '10px', padding: '16px', maxHeight: '90vh', overflow: 'auto', maxWidth: '90vw' }}>
-        <button
-          onClick={onClose}
-          style={{
-            float: 'right',
-            background: 'none',
-            border: 'none',
-            fontSize: '24px',
-            cursor: 'pointer',
-          }}
-        >
-          ✕
-        </button>
+    <div className="reporte-modal-overlay">
+      <div className="reporte-modal">
+        {/* Header dorado */}
+        <div className="reporte-modal__header">
+          <div className="reporte-modal__logo-area">
+            <div className="reporte-modal__shield">🛡</div>
+            <div className="reporte-modal__header-text">
+              <h2>Policía Nacional de Colombia</h2>
+              <p>
+                REPORTE CONSOLIDADO · {padreInput || 'ADMINISTRACIÓN'}
+              </p>
+              <p>{fechaStr}, {horaStr}</p>
+            </div>
+          </div>
+          <button className="reporte-modal__cerrar" onClick={onClose}>
+            Cerrar
+          </button>
+        </div>
 
-        <h2 style={{ fontSize: '14px', marginBottom: '12px', textAlign: 'center' }}>REPORTE CONSOLIDADO</h2>
-
-        <div style={{ marginBottom: '12px' }}>
+        {/* Cuerpo */}
+        <div className="reporte-modal__body">
           <input
             type="text"
             value={padreInput}
-            onChange={(e) => setPadreInput(e.target.value)}
+            onChange={(e) => setPadreInput(e.target.value.toUpperCase())}
             placeholder="Unidad Superior (Ej. DEPU ARAUCA)"
-            style={{
-              width: '100%',
-              padding: '8px',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              marginBottom: '8px',
-            }}
+            className="reporte-modal__unidad-input"
           />
+
+          {/* Sección 1: Resumen general */}
+          <div className="reporte-seccion-titulo">Resumen General Departamental</div>
+          <table className="reporte-tabla-resumen">
+            <thead>
+              <tr>
+                <th>CONCEPTO</th>
+                <th>OF</th>
+                <th>SUB</th>
+                <th>PT</th>
+                <th>AXP</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>T. FUERZA EFECTIVA</td>
+                <td>{consolidado.ef.of}</td>
+                <td>{consolidado.ef.sub}</td>
+                <td>{consolidado.ef.pt}</td>
+                <td>{consolidado.ef.axp}</td>
+              </tr>
+              <tr>
+                <td>T. NOVEDADES</td>
+                <td>{consolidado.novedades.of}</td>
+                <td>{consolidado.novedades.sub}</td>
+                <td>{consolidado.novedades.pt}</td>
+                <td>{consolidado.novedades.axp}</td>
+              </tr>
+              <tr className="row-disponible">
+                <td>T. DISPONIBLE</td>
+                <td>{disp.of}</td>
+                <td>{disp.sub}</td>
+                <td>{disp.pt}</td>
+                <td>{disp.axp}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Sección 2: Relación de personal por novedad */}
+          {categoriasConPersonal.length > 0 && (
+            <>
+              <div className="reporte-seccion-titulo">Relación de Personal por Novedad</div>
+              {categoriasConPersonal.map((cat) => (
+                <div key={cat} className="reporte-relacion-categoria">
+                  <h4>{cat}</h4>
+                  <ul>
+                    {relacionPersonal[cat].map((p, i) => (
+                      <li key={i}>
+                        {p.nombre} ({p.unidad})
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </>
+          )}
+
+          {/* Sección 3: Desglose por unidades */}
+          <div className="reporte-seccion-titulo">Desglose por Unidades</div>
+          <table className="reporte-tabla-desglose">
+            <thead>
+              <tr>
+                <th>CONCEPTO</th>
+                <th>OF</th>
+                <th>SUB</th>
+                <th>PT</th>
+                <th>AXP</th>
+              </tr>
+            </thead>
+            <tbody>
+              {partesHoy.map((parte) => {
+                const dispParte = {
+                  of: parte.ef_of - parte.nov_total_of,
+                  sub: parte.ef_sub - parte.nov_total_sub,
+                  pt: parte.ef_pt - parte.nov_total_pt,
+                  axp: parte.ef_axp - parte.nov_total_axp,
+                };
+                return (
+                  <Fragment key={parte.id}>
+                    <tr>
+                      <td colSpan={5} className="desglose-unidad-header">
+                        {parte.unidadNombre.toUpperCase()}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>EFECTIVA</td>
+                      <td>{parte.ef_of}</td>
+                      <td>{parte.ef_sub}</td>
+                      <td>{parte.ef_pt}</td>
+                      <td>{parte.ef_axp}</td>
+                    </tr>
+                    <tr>
+                      <td>NOVEDADES</td>
+                      <td>{parte.nov_total_of}</td>
+                      <td>{parte.nov_total_sub}</td>
+                      <td>{parte.nov_total_pt}</td>
+                      <td>{parte.nov_total_axp}</td>
+                    </tr>
+                    <tr className="row-disponible-desglose">
+                      <td>DISPONIBLE</td>
+                      <td>{dispParte.of}</td>
+                      <td>{dispParte.sub}</td>
+                      <td>{dispParte.pt}</td>
+                      <td>{dispParte.axp}</td>
+                    </tr>
+                  </Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+
+          {/* Firma */}
+          {elaboradoPor && (
+            <div className="reporte-firma">
+              <div className="reporte-firma__linea" />
+              <div className="reporte-firma__nombre">{elaboradoPor.toUpperCase()}</div>
+              <div className="reporte-firma__cargo">Elabora Parte de Personal</div>
+            </div>
+          )}
         </div>
 
-        <table className="reporte__table" style={{ fontSize: '10px', marginBottom: '16px' }}>
-          <thead>
-            <tr>
-              <th>CONCEPTO</th>
-              <th>OF</th>
-              <th>SUB</th>
-              <th>PT</th>
-              <th>AXP</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>T. FUERZA EFECTIVA</td>
-              <td>{consolidado.ef.of}</td>
-              <td>{consolidado.ef.sub}</td>
-              <td>{consolidado.ef.pt}</td>
-              <td>{consolidado.ef.axp}</td>
-            </tr>
-            <tr>
-              <td>T. NOVEDADES</td>
-              <td>{consolidado.novedades.of}</td>
-              <td>{consolidado.novedades.sub}</td>
-              <td>{consolidado.novedades.pt}</td>
-              <td>{consolidado.novedades.axp}</td>
-            </tr>
-            <tr style={{ background: '#e3f2fd' }}>
-              <td>T. DISPONIBLE</td>
-              <td>{consolidado.ef.of - consolidado.novedades.of}</td>
-              <td>{consolidado.ef.sub - consolidado.novedades.sub}</td>
-              <td>{consolidado.ef.pt - consolidado.novedades.pt}</td>
-              <td>{consolidado.ef.axp - consolidado.novedades.axp}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        {partesHoy.map((parte) => (
-          <div key={parte.id} style={{ marginBottom: '16px', borderTop: '1px solid #ccc', paddingTop: '8px' }}>
-            <h4 style={{ fontSize: '10px', fontWeight: 700, marginBottom: '4px' }}>
-              {parte.unidadNombre.toUpperCase()}
-            </h4>
-            <table style={{ fontSize: '8px', width: '100%', borderCollapse: 'collapse' }}>
-              <tbody>
-                <tr>
-                  <td style={{ border: '1px solid #999', padding: '2px' }}>Efectiva</td>
-                  <td style={{ border: '1px solid #999', padding: '2px', width: '30px' }}>{parte.ef_of}</td>
-                  <td style={{ border: '1px solid #999', padding: '2px', width: '30px' }}>{parte.ef_sub}</td>
-                  <td style={{ border: '1px solid #999', padding: '2px', width: '30px' }}>{parte.ef_pt}</td>
-                  <td style={{ border: '1px solid #999', padding: '2px', width: '30px' }}>{parte.ef_axp}</td>
-                </tr>
-                <tr>
-                  <td style={{ border: '1px solid #999', padding: '2px' }}>Novedades</td>
-                  <td style={{ border: '1px solid #999', padding: '2px' }}>{parte.nov_total_of}</td>
-                  <td style={{ border: '1px solid #999', padding: '2px' }}>{parte.nov_total_sub}</td>
-                  <td style={{ border: '1px solid #999', padding: '2px' }}>{parte.nov_total_pt}</td>
-                  <td style={{ border: '1px solid #999', padding: '2px' }}>{parte.nov_total_axp}</td>
-                </tr>
-                <tr style={{ background: '#f0f0f0' }}>
-                  <td style={{ border: '1px solid #999', padding: '2px' }}>Disponible</td>
-                  <td style={{ border: '1px solid #999', padding: '2px' }}>{parte.ef_of - parte.nov_total_of}</td>
-                  <td style={{ border: '1px solid #999', padding: '2px' }}>{parte.ef_sub - parte.nov_total_sub}</td>
-                  <td style={{ border: '1px solid #999', padding: '2px' }}>{parte.ef_pt - parte.nov_total_pt}</td>
-                  <td style={{ border: '1px solid #999', padding: '2px' }}>{parte.ef_axp - parte.nov_total_axp}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        ))}
-
-        {elaboradoPor && (
-          <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '10px' }}>
-            <div style={{ borderBottom: '1px solid #000', margin: '0 60px 4px' }}>&nbsp;</div>
-            <div style={{ fontWeight: 700 }}>{elaboradoPor.toUpperCase()}</div>
-            <div style={{ fontSize: '8px' }}>Elabora Parte de Personal</div>
-          </div>
-        )}
-
-        <button
-          onClick={onClose}
-          style={{
-            width: '100%',
-            padding: '12px',
-            background: '#666',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            marginTop: '16px',
-            fontWeight: 600,
-          }}
-        >
-          CERRAR
-        </button>
+        {/* Footer con botón WhatsApp */}
+        <div className="reporte-modal__footer">
+          <button className="btn-whatsapp" onClick={enviarWhatsApp}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+            </svg>
+            ENVIAR A WHATSAPP
+          </button>
+        </div>
       </div>
     </div>
   );
