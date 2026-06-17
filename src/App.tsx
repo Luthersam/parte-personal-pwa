@@ -234,11 +234,7 @@ function App() {
           </div>
         )}
 
-        <div style={{ marginBottom: '24px' }} />
-
         <MonitorConsolidado ef={consolidado.ef} novedades={consolidado.novedades} />
-
-        <div style={{ marginBottom: '40px' }} />
       </div>
 
       {showReporte && (
