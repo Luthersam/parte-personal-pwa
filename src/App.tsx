@@ -102,7 +102,8 @@ function App() {
       setError('');
     } catch (err) {
       console.error('Error guardando:', err);
-      setError('Error al guardar parte');
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(`Error al guardar: ${msg}`);
     }
   };
 
