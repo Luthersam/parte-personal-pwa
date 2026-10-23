@@ -3,7 +3,7 @@ import type { DBSchema, IDBPDatabase } from 'idb';
 import type { ParteGeonumerico } from './types';
 
 // Detectar si IndexedDB está disponible (falla en Safari privado y algunos contextos iOS)
-const idbAvailable = (() => {
+let idbAvailable = (() => {
   try {
     return typeof window !== 'undefined' &&
       'indexedDB' in window &&
@@ -76,7 +76,14 @@ function lsNextID(partes: ParteGeonumerico[]) {
 // ============================================================
 
 export async function initDB() {
-  if (idbAvailable) await idbInit();
+  if (!idbAvailable) return;
+  try {
+    await idbInit();
+  } catch (err) {
+    // IndexedDB existe pero no abre (Safari privado, iOS restringido): usar localStorage
+    console.warn('IndexedDB no disponible, usando localStorage:', err);
+    idbAvailable = false;
+  }
 }
 
 export async function guardarParte(parte: ParteGeonumerico) {

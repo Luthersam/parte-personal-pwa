@@ -143,7 +143,19 @@ export function useParteStore() {
     };
 
     setStore((prev) => {
-      const newStore = { ...prev };
+      // Reiniciar todas las categorías para no arrastrar datos de otra unidad
+      const newStore: ParteStore = {
+        ...prev,
+        comision: INIT_CUARTETO,
+        excusado: INIT_CUARTETO,
+        franquicia: INIT_CUARTETO,
+        permiso: INIT_CUARTETO,
+        vacaciones: INIT_CUARTETO,
+        servicios: INIT_CUARTETO,
+        retardado: INIT_CUARTETO,
+        horarioFlexible: INIT_CUARTETO,
+        otros: INIT_CUARTETO,
+      };
 
       for (const [label, data] of Object.entries(dict)) {
         const id = mapping[label];
@@ -200,10 +212,11 @@ export function useParteStore() {
   }, [store]);
 
   const limpiar = useCallback(() => {
-    setStore({
+    // Conserva quién elabora y la unidad superior: se necesitan para el reporte
+    setStore((prev) => ({
       unidadNombre: '',
-      unidadPadre: '',
-      elaboradoPor: '',
+      unidadPadre: prev.unidadPadre,
+      elaboradoPor: prev.elaboradoPor,
       ef: INIT_CUARTETO,
       comision: INIT_CUARTETO,
       excusado: INIT_CUARTETO,
@@ -215,7 +228,7 @@ export function useParteStore() {
       horarioFlexible: INIT_CUARTETO,
       otros: INIT_CUARTETO,
       nombresDict: {},
-    });
+    }));
   }, []);
 
   return {

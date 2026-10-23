@@ -27,7 +27,9 @@ function App() {
   const [showReporte, setShowReporte] = useState(false);
 
   useEffect(() => {
-    initDB().then(() => cargarPartesHoy());
+    initDB()
+      .catch((err) => console.error('Error iniciando BD:', err))
+      .then(() => cargarPartesHoy());
   }, []);
 
   const cargarPartesHoy = async () => {
@@ -362,24 +364,32 @@ function ReporteModal({
       });
 
       canvas.toBlob(async (blob) => {
-        if (!blob) return;
-        const file = new File([blob], 'reporte-parte-personal.png', { type: 'image/png' });
+        try {
+          if (!blob) return;
+          const file = new File([blob], 'reporte-parte-personal.png', { type: 'image/png' });
 
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: `Parte de Personal - ${padreInput || 'CONSOLIDADO'}`,
-          });
-        } else {
-          // Fallback: descargar la imagen
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'reporte-parte-personal.png';
-          a.click();
-          URL.revokeObjectURL(url);
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: `Parte de Personal - ${padreInput || 'CONSOLIDADO'}`,
+            });
+          } else {
+            // Fallback: descargar la imagen
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'reporte-parte-personal.png';
+            a.click();
+            URL.revokeObjectURL(url);
+          }
+        } catch (err) {
+          // AbortError = el usuario canceló el diálogo de compartir
+          if (!(err instanceof DOMException && err.name === 'AbortError')) {
+            console.error('Error compartiendo imagen:', err);
+          }
+        } finally {
+          setCompartiendo(false);
         }
-        setCompartiendo(false);
       }, 'image/png');
     } catch (err) {
       console.error('Error generando imagen:', err);
