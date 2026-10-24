@@ -155,13 +155,21 @@ function App() {
   };
 
   const limpiarHoy = async () => {
-    if (confirm('¿Borrar todos los registros de hoy?')) {
-      try {
-        await borrarPartesHoy();
-        await cargarPartesHoy();
-      } catch (err) {
-        console.error('Error borrando:', err);
-      }
+    if (!confirm('¿Borrar todos los registros de hoy y limpiar el formulario?')) return;
+
+    // Se vacía la pantalla al instante; luego se borra de la base y se vuelve a leer para confirmar
+    setPartesHoy([]);
+    store.limpiar();
+    setError('');
+    try {
+      await borrarPartesHoy();
+      setAviso('Registros de hoy borrados');
+    } catch (err) {
+      console.error('Error borrando:', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(`No se pudieron borrar los registros: ${msg}`);
+    } finally {
+      await cargarPartesHoy();
     }
   };
 

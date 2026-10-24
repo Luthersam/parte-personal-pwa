@@ -172,14 +172,14 @@ export async function borrarPartesHoy() {
   mañana.setDate(mañana.getDate() + 1);
 
   if (idbAvailable) {
-    const store = await idbGetDB();
-    const all = await store.getAll('partes');
-    for (const p of all) {
+    // Una sola transacción: mucho más rápido que borrar uno por uno (sobre todo en iPhone)
+    const tx = (await idbGetDB()).transaction('partes', 'readwrite');
+    const all = await tx.store.getAll();
+    const borrar = all.filter((p) => {
       const f = new Date(p.fecha);
-      if (f >= hoy && f < mañana && p.id != null) {
-        await store.delete('partes', p.id);
-      }
-    }
+      return f >= hoy && f < mañana && p.id != null;
+    });
+    await Promise.all([...borrar.map((p) => tx.store.delete(p.id!)), tx.done]);
     return;
   }
 
