@@ -222,7 +222,7 @@ function App() {
         <div className="button-group" style={{ marginTop: '6px', gridTemplateColumns: '1fr' }}>
           <button onClick={() => setShowColecta(true)} className="btn btn--primary">
             <Icono nombre="qr" />
-            RECOLECTAR POR QR
+            RECIBIR POR QR
           </button>
         </div>
 
