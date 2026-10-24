@@ -49,7 +49,6 @@ async function idbGetDB() {
 // ============================================================
 
 const LS_KEY = 'partePersonalData';
-let lsNextId = 1;
 
 function lsGetAll(): ParteGeonumerico[] {
   try {

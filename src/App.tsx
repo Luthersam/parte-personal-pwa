@@ -29,6 +29,15 @@ function App() {
   const [showColecta, setShowColecta] = useState(false);
   const [aviso, setAviso] = useState('');
 
+  const cargarPartesHoy = async () => {
+    try {
+      const partes = await obtenerPartesHoy();
+      setPartesHoy(partes.map((p) => ({ ...p, fecha: new Date(p.fecha) })));
+    } catch (err) {
+      console.error('Error cargando partes:', err);
+    }
+  };
+
   useEffect(() => {
     initDB()
       .catch((err) => console.error('Error iniciando BD:', err))
@@ -41,18 +50,9 @@ function App() {
     return () => clearTimeout(id);
   }, [aviso]);
 
-  const cargarPartesHoy = async () => {
-    try {
-      const partes = await obtenerPartesHoy();
-      setPartesHoy(partes.map((p) => ({ ...p, fecha: new Date(p.fecha) })));
-    } catch (err) {
-      console.error('Error cargando partes:', err);
-    }
-  };
-
   const totalesConsolidado = () => {
-    let ef: Cuarteto = { of: 0, sub: 0, pt: 0, axp: 0 };
-    let novedades: Cuarteto = { of: 0, sub: 0, pt: 0, axp: 0 };
+    const ef: Cuarteto = { of: 0, sub: 0, pt: 0, axp: 0 };
+    const novedades: Cuarteto = { of: 0, sub: 0, pt: 0, axp: 0 };
 
     for (const parte of partesHoy) {
       ef.of += parte.ef_of;

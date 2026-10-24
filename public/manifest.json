@@ -1,17 +1,35 @@
 {
   "name": "Parte de Personal",
   "short_name": "Parte Personal",
-  "description": "Reporte diario de disponibilidad de personal",
+  "description": "Consolide el parte de todo su equipo en minutos y en tiempo real. Rápido, sencillo y seguro: la información se queda en sus dispositivos.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#141828",
+  "background_color": "#141c3d",
   "theme_color": "#c8a000",
   "lang": "es-CO",
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
   ]
 }

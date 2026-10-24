@@ -43,10 +43,6 @@ export function useParteStore() {
   const updateNovedad = useCallback(
     (categoria: string, field: keyof Cuarteto, value: number) => {
       setStore((prev) => {
-        const categoriaKey = Object.keys(prev).find(
-          (k) => k !== 'unidadNombre' && k !== 'unidadPadre' && k !== 'elaboradoPor' && k !== 'ef' && k !== 'nombresDict'
-        );
-
         const mapping: { [key: string]: keyof ParteStore } = {
           com: 'comision',
           exc: 'excusado',

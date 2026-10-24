@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2f4fa8"/>
+      <stop offset="1" stop-color="#141c3d"/>
+    </linearGradient>
+    <clipPath id="c"><rect width="512" height="512"/></clipPath>
+  </defs>
+  <g clip-path="url(#c)">
+    <rect width="512" height="512" fill="url(#bg)"/>
+    <g transform="translate(0.0 0.0) scale(1.0)">
+
+  <circle cx="256" cy="262" r="196" fill="#ffffff" fill-opacity="0.07"/>
+
+  <!-- hombros / camisa -->
+  <path d="M84 900 L84 520 C84 400 150 338 256 338 C362 338 428 400 428 520 L428 900 Z" fill="#c8a000"/>
+  <path d="M214 338 L256 392 L298 338 Z" fill="#f6f1de"/>
+  <path d="M256 392 L240 520 L272 520 Z" fill="#8f7400" fill-opacity="0.55"/>
+
+  <!-- cuello y cara -->
+  <rect x="226" y="286" width="60" height="62" rx="22" fill="#d99d6c"/>
+  <circle cx="171" cy="222" r="17" fill="#f1bf8f"/>
+  <circle cx="341" cy="222" r="17" fill="#f1bf8f"/>
+  <ellipse cx="256" cy="216" rx="84" ry="96" fill="#f1bf8f"/>
+
+  <!-- gorra -->
+  <path d="M168 196 C168 124 208 92 256 92 C304 92 344 124 344 196 Z" fill="#243a7a"/>
+  <rect x="168" y="176" width="176" height="20" fill="#c8a000"/>
+  <path d="M152 202 Q256 176 360 202 Q360 218 256 214 Q152 218 152 202 Z" fill="#141c3d"/>
+  <circle cx="256" cy="140" r="15" fill="#c8a000"/>
+
+  <!-- rostro -->
+  <path d="M206 230 Q222 220 238 230" stroke="#141c3d" stroke-width="7" stroke-linecap="round" fill="none"/>
+  <path d="M274 230 Q290 220 306 230" stroke="#141c3d" stroke-width="7" stroke-linecap="round" fill="none"/>
+  <circle cx="222" cy="248" r="11" fill="#141c3d"/>
+  <circle cx="290" cy="248" r="11" fill="#141c3d"/>
+  <circle cx="226" cy="244" r="3.6" fill="#fff"/>
+  <circle cx="294" cy="244" r="3.6" fill="#fff"/>
+  <path d="M256 252 Q250 270 258 274" stroke="#d99d6c" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M222 292 Q256 318 290 292" stroke="#8a4b2a" stroke-width="8" stroke-linecap="round" fill="none"/>
+
+  <!-- tablilla con lista -->
+  <g transform="rotate(7 366 372)">
+    <rect x="296" y="268" width="146" height="196" rx="18" fill="#8a5a2b"/>
+    <rect x="308" y="296" width="122" height="156" rx="8" fill="#ffffff"/>
+    <rect x="340" y="254" width="58" height="34" rx="10" fill="#9aa3b5"/>
+    <rect x="352" y="262" width="34" height="14" rx="7" fill="#e4e8f0"/>
+    <path d="M320 334 l9 10 l17 -20" stroke="#1e9e4a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <rect x="358" y="328" width="60" height="11" rx="5.5" fill="#c5cbd8"/>
+    <path d="M320 380 l9 10 l17 -20" stroke="#1e9e4a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <rect x="358" y="374" width="60" height="11" rx="5.5" fill="#c5cbd8"/>
+    <rect x="322" y="418" width="22" height="22" rx="5" fill="none" stroke="#9aa3b5" stroke-width="5"/>
+    <rect x="358" y="424" width="60" height="11" rx="5.5" fill="#c5cbd8"/>
+  </g>
+
+  <!-- mano que sostiene la tablilla -->
+  <ellipse cx="441" cy="412" rx="22" ry="32" fill="#f1bf8f"/>
+  <path d="M432 392 h22 M432 412 h22 M432 432 h20" stroke="#d99d6c" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- lápiz -->
+  <g transform="translate(222 470) rotate(-45)">
+    <rect x="0" y="-11" width="22" height="22" rx="6" fill="#f08aa5"/>
+    <rect x="20" y="-11" width="12" height="22" fill="#b9c0cf"/>
+    <rect x="32" y="-11" width="92" height="22" fill="#ffcc33"/>
+    <rect x="32" y="-11" width="92" height="7" fill="#ffe27a"/>
+    <path d="M124 -11 L158 0 L124 11 Z" fill="#f1d2a0"/>
+    <path d="M148 -3.6 L158 0 L148 3.6 Z" fill="#2b2f3a"/>
+  </g>
+
+  <!-- mano que sostiene el lápiz -->
+  <ellipse cx="248" cy="446" rx="32" ry="25" transform="rotate(-45 248 446)" fill="#f1bf8f"/>
+  <path d="M232 454 l22 -22 M240 462 l22 -22" stroke="#d99d6c" stroke-width="4" stroke-linecap="round"/>
+
+    </g>
+  </g>
+</svg>

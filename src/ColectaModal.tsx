@@ -115,7 +115,10 @@ export function ColectaModal({
   const colectaRef = useRef<Colecta | null>(null);
   const resolvers = useRef(new Map<string, (d: Decision) => void>());
   const onAprobarRef = useRef(onAprobar);
-  onAprobarRef.current = onAprobar;
+
+  useEffect(() => {
+    onAprobarRef.current = onAprobar;
+  }, [onAprobar]);
 
   useEffect(() => {
     let cancelado = false;
