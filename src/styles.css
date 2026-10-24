@@ -49,12 +49,21 @@ body {
   }
 }
 
-.glass,
-.monitor--consolidado,
-.formulario__section {
+.glass {
   background: var(--glass-bg);
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+/* Tarjetas con datos que cambian (tabla, cantidades, nombres): translúcidas pero SIN desenfoque.
+   En Safari de iPhone, un backdrop-filter sobre contenido que se actualiza deja el dibujo viejo
+   en pantalla (por ejemplo, números que no se borran tras LIMPIAR). Sobre el fondo liso el
+   desenfoque casi no se notaba. */
+.monitor--consolidado,
+.formulario__section {
+  background: rgba(255, 255, 255, 0.82);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
 }
@@ -115,6 +124,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
+  transform: translateZ(0); /* capa propia: ayuda a Safari a repintar los números al cambiar */
   background: var(--glass-gold);
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
@@ -749,9 +759,7 @@ body {
 .chip-unidad {
   min-height: 48px;
   padding: 10px 16px;
-  background: var(--glass-bg);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
+  background: rgba(255, 255, 255, 0.85);
   border: 2px solid var(--color-primary-dark);
   border-radius: 14px;
   color: var(--color-primary-dark);
