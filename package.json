@@ -7,17 +7,26 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "android:sync": "vite build && cap sync android",
+    "android:abrir": "cap open android"
   },
   "dependencies": {
+    "@capacitor-community/keep-awake": "^8.0.1",
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.5.3",
     "html2canvas": "^1.4.1",
     "idb": "^8.0.3",
+    "jsqr": "^1.4.0",
     "peerjs": "^1.5.5",
     "qrcode": "^1.5.4",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.3",
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.12.3",
     "@types/qrcode": "^1.5.5",

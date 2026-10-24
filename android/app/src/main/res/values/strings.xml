@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Parte de Personal</string>
+    <string name="title_activity_main">Parte de Personal</string>
+    <string name="package_name">com.partepersonal.app</string>
+    <string name="custom_url_scheme">com.partepersonal.app</string>
+</resources>

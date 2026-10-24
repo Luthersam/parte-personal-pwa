@@ -1,6 +1,7 @@
 import Peer from 'peerjs';
 import type { DataConnection } from 'peerjs';
 import type { NovedadesData, ParteGeonumerico } from './types';
+import { urlBase } from './nativo';
 
 // Recolección de partes entre celulares por WebRTC (PeerJS).
 // El broker público de PeerJS solo ayuda a conectar los dispositivos; los datos
@@ -149,7 +150,7 @@ export function iniciarColecta(opts: {
   return new Promise((resolve, reject) => {
     peer.on('open', () => {
       opts.onEstado('abierta');
-      const url = `${location.origin}/?c=${peerId}&k=${token}`;
+      const url = `${urlBase()}/?c=${peerId}&k=${token}`;
       resolve({ url, expiraEn, cerrar });
     });
     peer.on('error', (err) => {
@@ -167,12 +168,23 @@ export function iniciarColecta(opts: {
 // UNIDAD (celular que escanea el QR)
 // ============================================================
 
-export function paramsColecta(): { peerId: string; token: string } | null {
-  const p = new URLSearchParams(location.search);
+// Extrae los datos de conexión de un enlace de recepción (el contenido del QR).
+// Solo importan los parámetros: sirve igual si el QR trae otra dirección de la app.
+export function paramsDeEnlace(texto: string): { peerId: string; token: string } | null {
+  let p: URLSearchParams;
+  try {
+    p = new URL(texto).searchParams;
+  } catch {
+    return null;
+  }
   const peerId = p.get('c');
   const token = p.get('k');
   if (!peerId || !token || !/^pp-[0-9a-f]{16}$/.test(peerId) || !/^[0-9a-f]{16}$/.test(token)) return null;
   return { peerId, token };
+}
+
+export function paramsColecta(): { peerId: string; token: string } | null {
+  return paramsDeEnlace(location.href);
 }
 
 // Resuelve cuando el coordinador aprueba; rechaza con el motivo si lo rechaza.

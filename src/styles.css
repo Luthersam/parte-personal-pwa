@@ -701,6 +701,38 @@ body {
   color: #222;
 }
 
+/* === ESCÁNER DE QR === */
+.escaner {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #000;
+}
+
+.escaner__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.escaner__marco {
+  position: absolute;
+  inset: 14%;
+  border: 3px solid #fff;
+  border-radius: 20px;
+  box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+.nota {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin: 6px 0 12px;
+}
+
 /* === AVISOS === */
 .aviso-error {
   background: #fde7e5;

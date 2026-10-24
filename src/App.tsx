@@ -6,7 +6,10 @@ import { MonitorConsolidado } from './components/MonitorConsolidado';
 import { FormularioDetallado } from './components/FormularioDetallado';
 import { ColectaModal } from './ColectaModal';
 import { InstalarModal } from './InstalarModal';
-import { yaInstalada } from './instalar';
+import { useBotonAtras } from './atras';
+import { EscanerModal } from './EscanerModal';
+import { EnvioUnidad } from './EnvioUnidad';
+import { yaInstalada, esAndroid, esIOS } from './instalar';
 import type { InstalarEvento } from './instalar';
 import { useParteStore } from './useParteStore';
 import { obtenerPartesHoy, guardarParte, borrarPartesHoy, initDB, obtenerPartePorUnidad } from './db';
@@ -32,6 +35,9 @@ function App() {
   const [showReporte, setShowReporte] = useState(false);
   const [showColecta, setShowColecta] = useState(false);
   const [aviso, setAviso] = useState('');
+  const [showEscaner, setShowEscaner] = useState(false);
+  // Datos de conexión leídos del QR del coordinador: muestra el formulario de envío dentro de la app
+  const [envio, setEnvio] = useState<{ peerId: string; token: string } | null>(null);
   // Si la app no está instalada, la ventana de instalación se abre sola al entrar
   const [showInstalar, setShowInstalar] = useState(() => !yaInstalada());
   const [eventoInstalar, setEventoInstalar] = useState<InstalarEvento | null>(null);
@@ -180,6 +186,10 @@ function App() {
   const consolidado = totalesConsolidado();
   const totales = store.obtenerTotales();
 
+  if (envio) {
+    return <EnvioUnidad peerId={envio.peerId} token={envio.token} onVolver={() => setEnvio(null)} />;
+  }
+
   return (
     <div className="app">
       <div className="app__header">
@@ -233,6 +243,19 @@ function App() {
             RECIBIR POR QR
           </button>
         </div>
+        {esAndroid() && (
+          <div className="button-group" style={{ marginTop: '0', gridTemplateColumns: '1fr' }}>
+            <button onClick={() => setShowEscaner(true)} className="btn btn--primary">
+              <Icono nombre="escanear" />
+              ENVIAR MI PARTE (ESCANEAR QR)
+            </button>
+          </div>
+        )}
+        {esIOS() && (
+          <p className="nota">
+            Para enviar su parte: escanee el QR del coordinador con la cámara del iPhone o iPad. Se abrirá en Safari.
+          </p>
+        )}
 
         {partesHoy.length > 0 && (
           <div>
@@ -260,6 +283,16 @@ function App() {
           </button>
         )}
       </div>
+
+      {showEscaner && (
+        <EscanerModal
+          onLeido={(datos) => {
+            setShowEscaner(false);
+            setEnvio(datos);
+          }}
+          onClose={() => setShowEscaner(false)}
+        />
+      )}
 
       {showInstalar && <InstalarModal evento={eventoInstalar} onClose={() => setShowInstalar(false)} />}
 
@@ -308,6 +341,7 @@ function ReporteModal({
 }) {
   const [padreInput, setPadreInput] = useState(unidadPadre || '');
   const [compartiendo, setCompartiendo] = useState(false);
+  useBotonAtras(onClose);
   const reporteRef = useRef<HTMLDivElement>(null);
 
   const disp = {

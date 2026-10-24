@@ -4,6 +4,9 @@ import { iniciarColecta } from './colecta';
 import type { Colecta, Decision } from './colecta';
 import type { NovedadesData, ParteGeonumerico } from './types';
 import { Icono } from './Icono';
+import { useBotonAtras } from './atras';
+import { esNativo } from './nativo';
+import { KeepAwake } from '@capacitor-community/keep-awake';
 
 function formatoRestante(ms: number) {
   const s = Math.max(0, Math.floor(ms / 1000));
@@ -196,6 +199,15 @@ export function ColectaModal({
     }
   };
 
+  // En la app de Android, mantener la pantalla encendida mientras se reciben partes
+  useEffect(() => {
+    if (!esNativo()) return;
+    void KeepAwake.keepAwake();
+    return () => {
+      void KeepAwake.allowSleep();
+    };
+  }, []);
+
   // Con partes sin decidir, pide confirmación antes de cerrar (se perderían)
   const terminar = () => {
     if (estado === 'abierta' && pendientes.length > 0) setConfirmando(true);
@@ -216,6 +228,13 @@ export function ColectaModal({
     await new Promise((r) => setTimeout(r, 800));
     onClose();
   };
+
+  // Botón "atrás" de Android: cierra el aviso si está abierto; si no, intenta terminar
+  useBotonAtras(() => {
+    if (cerrando) return;
+    if (confirmando) setConfirmando(false);
+    else terminar();
+  });
 
   const rechazar = (parte: ParteGeonumerico) => {
     const motivo = window.prompt(`Motivo del rechazo de ${parte.unidadNombre} (la unidad lo verá):`, '');

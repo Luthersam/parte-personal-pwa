@@ -55,6 +55,14 @@ const TRAZOS = {
     'M8.5 16.5h7',
   ],
   chevron: ['M6 9.5l6 6 6-6'],
+  escanear: [
+    'M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8',
+    'M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8',
+    'M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16',
+    'M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16',
+    'M4 12h16',
+  ],
+  atras: ['M14.5 6l-6 6 6 6'],
 } as const;
 
 export type NombreIcono = keyof typeof TRAZOS;

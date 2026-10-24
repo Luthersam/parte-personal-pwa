@@ -6,14 +6,17 @@ import { useParteStore } from './useParteStore';
 import { enviarParte } from './colecta';
 import type { ParteGeonumerico } from './types';
 import { Icono } from './Icono';
+import { useBotonAtras } from './atras';
 
 // Pantalla que ve una unidad al escanear el QR del coordinador.
-export function EnvioUnidad({ peerId, token }: { peerId: string; token: string }) {
+export function EnvioUnidad({ peerId, token, onVolver }: { peerId: string; token: string; onVolver?: () => void }) {
   const store = useParteStore();
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
   const [pendiente, setPendiente] = useState(false);
+  // Botón "atrás" de Android: vuelve al inicio (solo cuando se abrió desde la app)
+  useBotonAtras(() => onVolver?.(), !!onVolver);
 
   // Al terminar, volver arriba: si no, el aviso queda tapado por la barra del navegador
   useEffect(() => {
@@ -79,6 +82,12 @@ export function EnvioUnidad({ peerId, token }: { peerId: string; token: string }
             <Icono nombre="actualizar" />
             CORREGIR Y REENVIAR
           </button>
+          {onVolver && (
+            <button className="btn btn--success btn--centrado" style={{ marginTop: 12 }} onClick={onVolver}>
+              <Icono nombre="atras" />
+              VOLVER AL INICIO
+            </button>
+          )}
         </div>
       </div>
     );
@@ -92,6 +101,14 @@ export function EnvioUnidad({ peerId, token }: { peerId: string; token: string }
         <h1>PARTE DE PERSONAL</h1>
         <p>Envío al coordinador</p>
       </div>
+      {onVolver && (
+        <div className="app__content" style={{ paddingTop: 10, paddingBottom: 0 }}>
+          <button className="btn-link" style={{ margin: 0 }} onClick={onVolver}>
+            <Icono nombre="atras" />
+            Volver al inicio
+          </button>
+        </div>
+      )}
 
       <div className="app__content">
         <MonitorEnVivo ef={store.store.ef} novedades={totales.novedades} />

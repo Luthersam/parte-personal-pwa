@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { InstalarEvento } from './instalar';
+import { useBotonAtras } from './atras';
 import { Icono } from './Icono';
 
 type Plataforma = 'android' | 'ios';
@@ -19,6 +20,7 @@ export function InstalarModal({
 }) {
   const [plataforma, setPlataforma] = useState<Plataforma>(detectarPlataforma);
   const [resultado, setResultado] = useState('');
+  useBotonAtras(onClose);
 
   const instalarAhora = async () => {
     if (!evento) return;

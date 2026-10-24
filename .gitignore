@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Llaves de firma de Android: NUNCA subir a git
+*.jks
+*.keystore
+keystore.properties
+android/keystore.properties
