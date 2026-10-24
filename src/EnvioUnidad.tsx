@@ -56,7 +56,9 @@ export function EnvioUnidad({ peerId, token }: { peerId: string; token: string }
       setEnviado(true);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      setError(llego ? `El coordinador no aprobó el parte: ${msg}` : msg);
+      // Si el coordinador cerró la recepción, el mensaje ya es completo; si rechazó, se antepone el motivo
+      const cierre = (err as { cierre?: boolean }).cierre === true;
+      setError(llego && !cierre ? `El coordinador no aprobó el parte: ${msg}` : msg);
     } finally {
       setEnviando(false);
       setPendiente(false);

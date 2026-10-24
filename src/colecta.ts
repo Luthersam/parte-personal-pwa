@@ -25,8 +25,9 @@ const ETIQUETAS = [
 
 type MensajeEnvio = { t: 'envio'; token: string; parte: ParteGeonumerico };
 // 'recibido' = llegó y espera decisión; 'ok' = aprobado; 'error' = rechazado o inválido
-type Respuesta = { t: 'recibido' } | { t: 'ok' } | { t: 'error'; msg: string };
-export type Decision = { ok: true } | { ok: false; msg: string };
+// cierre = el coordinador terminó la recepción sin decidir sobre este parte
+type Respuesta = { t: 'recibido' } | { t: 'ok' } | { t: 'error'; msg: string; cierre?: boolean };
+export type Decision = { ok: true } | { ok: false; msg: string; cierre?: boolean };
 
 function aleatorio(bytes: number): string {
   const b = crypto.getRandomValues(new Uint8Array(bytes));
@@ -141,7 +142,7 @@ export function iniciarColecta(opts: {
       } catch {
         decision = { ok: false, msg: 'No se pudo procesar en el coordinador.' };
       }
-      responder(decision.ok ? { t: 'ok' } : { t: 'error', msg: decision.msg });
+      responder(decision.ok ? { t: 'ok' } : { t: 'error', msg: decision.msg, cierre: decision.cierre });
     });
   });
 
@@ -208,9 +209,11 @@ export function enviarParte(
           clearTimeout(limite); // ya llegó: la decisión puede tardar
           onPendiente?.();
         } else if (r.t === 'ok') fin();
-        else if (r.t === 'error') fin(new Error(r.msg));
+        else if (r.t === 'error') fin(Object.assign(new Error(r.msg), { cierre: r.cierre === true }));
       });
-      conn.on('close', () => fin(new Error('Se perdió la conexión con el coordinador. Reenvíe el parte.')));
+      conn.on('close', () =>
+        fin(new Error('Se cerró la conexión con el coordinador. Si terminó la recepción, pídale un QR nuevo y reenvíe su parte.'))
+      );
       conn.on('error', (e) => fin(e));
     });
   });

@@ -115,6 +115,8 @@ export function ColectaModal({
   const [errorGuardar, setErrorGuardar] = useState('');
   const [restante, setRestante] = useState(0);
   const [nuevo, setNuevo] = useState('');
+  const [confirmando, setConfirmando] = useState(false);
+  const [cerrando, setCerrando] = useState(false);
   const colectaRef = useRef<Colecta | null>(null);
   const resolvers = useRef(new Map<string, (d: Decision) => void>());
   const onAprobarRef = useRef(onAprobar);
@@ -194,6 +196,27 @@ export function ColectaModal({
     }
   };
 
+  // Con partes sin decidir, pide confirmación antes de cerrar (se perderían)
+  const terminar = () => {
+    if (estado === 'abierta' && pendientes.length > 0) setConfirmando(true);
+    else onClose();
+  };
+
+  // Avisa a cada unidad pendiente y deja un instante para que el aviso llegue antes de cerrar
+  const terminarYAvisar = async () => {
+    setCerrando(true);
+    for (const resolver of resolvers.current.values()) {
+      resolver({
+        ok: false,
+        cierre: true,
+        msg: 'El coordinador cerró la recepción antes de revisar su parte. Pídale un QR nuevo y reenvíelo.',
+      });
+    }
+    resolvers.current.clear();
+    await new Promise((r) => setTimeout(r, 800));
+    onClose();
+  };
+
   const rechazar = (parte: ParteGeonumerico) => {
     const motivo = window.prompt(`Motivo del rechazo de ${parte.unidadNombre} (la unidad lo verá):`, '');
     if (motivo === null) return; // canceló
@@ -213,10 +236,35 @@ export function ColectaModal({
               <p>Las unidades escanean el QR y envían su parte</p>
             </div>
           </div>
-          <button className="reporte-modal__cerrar" onClick={onClose}>
+          <button className="reporte-modal__cerrar" onClick={terminar}>
             {estado === 'abierta' ? 'Terminar' : 'Cerrar'}
           </button>
         </div>
+
+        {confirmando && (
+          <div className="dialogo-overlay">
+            <div className="dialogo" role="alertdialog" aria-modal="true" aria-label="Terminar la recepción">
+              <div className="dialogo__cuerpo">
+                <h3 style={{ fontSize: 22, marginBottom: 8 }}>¿Terminar la recepción?</h3>
+                <p style={{ fontSize: 17, lineHeight: 1.45, marginBottom: 16 }}>
+                  Hay {pendientes.length} {pendientes.length === 1 ? 'parte' : 'partes'} sin revisar. Si termina ahora se
+                  descartan, y esas unidades tendrán que pedir un QR nuevo y reenviar.
+                </p>
+                <button
+                  className="btn btn--primary"
+                  style={{ width: '100%', marginBottom: 10 }}
+                  disabled={cerrando}
+                  onClick={() => setConfirmando(false)}
+                >
+                  Seguir revisando
+                </button>
+                <button className="btn btn--danger" style={{ width: '100%' }} disabled={cerrando} onClick={terminarYAvisar}>
+                  {cerrando ? 'Avisando a las unidades...' : 'Terminar y descartar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {nuevo && (
           <div className="toast" role="status">
