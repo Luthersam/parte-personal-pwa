@@ -118,6 +118,11 @@ Resultado: `android/app/build/outputs/bundle/release/app-release.aab`.
 Los cambios de la web en Vercel **no** llegan solos a la app de Android: hay que publicar una
 versión nueva.
 
+## Conexión en redes difíciles
+
+Si dos celulares no logran conectarse (por ejemplo, con internet compartido desde un celular), hace
+falta un servidor TURN. Los pasos están en [GUIA_TURN.md](GUIA_TURN.md).
+
 ## Riesgos a tener en cuenta
 
 - **Revisión de Google:** las apps que solo muestran una página web pueden ser rechazadas por

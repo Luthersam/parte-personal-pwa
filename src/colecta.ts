@@ -17,6 +17,7 @@ const MAX_NUMERO = 99_999;
 // (internet compartido desde un celular, algunos operadores) hace falta un TURN real: se agrega con
 // la variable VITE_ICE_SERVERS, un JSON como
 //   [{"urls":["turn:host:3478?transport=udp","turns:host:443?transport=tcp"],"username":"...","credential":"..."}]
+// Los pasos completos están en GUIA_TURN.md.
 const ICE_BASE: RTCIceServer[] = [
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun.cloudflare.com:3478' },
@@ -34,7 +35,17 @@ function servidoresIce(): RTCIceServer[] {
   }
 }
 
-const opcionesPeer = (): PeerOptions => ({ config: { iceServers: servidoresIce(), iceCandidatePoolSize: 2 } });
+// VITE_ICE_SOLO_RELAY=true obliga a pasar por el TURN: sirve para comprobar que el TURN funciona de verdad.
+// No lo dejes activado en producción (todo el tráfico pasaría por el proveedor).
+const SOLO_RELAY = import.meta.env.VITE_ICE_SOLO_RELAY === 'true';
+
+const opcionesPeer = (): PeerOptions => ({
+  config: {
+    iceServers: servidoresIce(),
+    iceCandidatePoolSize: 2,
+    ...(SOLO_RELAY ? { iceTransportPolicy: 'relay' as const } : {}),
+  },
+});
 
 const ETIQUETAS = [
   'COMISIÓN',
