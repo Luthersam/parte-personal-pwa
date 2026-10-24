@@ -328,6 +328,10 @@ export function ColectaModal({
               <p style={{ fontSize: 14, color: '#444', margin: 0 }}>
                 Mantenga esta pantalla abierta mientras las unidades envían.
               </p>
+              <p style={{ fontSize: 14, color: '#444', margin: '6px 0 0' }}>
+                Si alguien no logra conectarse, prueben con la misma red Wi-Fi y eviten compartir internet desde un
+                celular.
+              </p>
             </>
           )}
 

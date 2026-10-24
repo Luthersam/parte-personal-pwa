@@ -7,6 +7,7 @@ import { FormularioDetallado } from './components/FormularioDetallado';
 import { ColectaModal } from './ColectaModal';
 import { InstalarModal } from './InstalarModal';
 import { useBotonAtras } from './atras';
+import { URL_PRIVACIDAD } from './nativo';
 import { EscanerModal } from './EscanerModal';
 import { EnvioUnidad } from './EnvioUnidad';
 import { yaInstalada, esAndroid, esIOS } from './instalar';
@@ -282,6 +283,12 @@ function App() {
             ¿Cómo instalar la app en su celular?
           </button>
         )}
+
+        <p className="nota-legal">
+          <a href={URL_PRIVACIDAD} target="_blank" rel="noopener noreferrer">
+            Política de privacidad
+          </a>
+        </p>
       </div>
 
       {showEscaner && (

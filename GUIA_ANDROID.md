@@ -51,17 +51,28 @@ instálalo (hay que permitir "instalar apps desconocidas"), o con el celular por
 depuración USB activada: `adb install -r app/build/outputs/apk/debug/app-debug.apk`.
 También puedes abrir el proyecto con `npm run android:abrir` y pulsar ▶ en Android Studio.
 
-## Crear la llave de firma (una sola vez)
+## La llave de firma (ya creada)
 
-Google Play exige que las versiones estén firmadas. **Guarda esta llave y sus contraseñas en un
-lugar seguro (con copia): si la pierdes no podrás actualizar la app sin pasar por soporte.**
+Google Play exige que cada versión esté firmada. La llave de subida ya se creó con estos archivos:
+
+| Archivo | Qué es |
+|---|---|
+| `~/parte-personal-upload.jks` | La llave de firma (almacén de llaves). |
+| `android/keystore.properties` | Ruta y contraseñas, que lee Gradle al firmar. |
+
+Ambos están **fuera de git** (no se suben nunca). **Haz una copia de los dos en un lugar seguro**
+(por ejemplo, un gestor de contraseñas o un disco externo): sin ellos no podrás firmar
+actualizaciones. Si los pierdes, con Play App Signing activado se puede pedir a Google que
+restablezca la llave de subida, pero es un trámite lento.
+
+Si alguna vez necesitas crear una nueva (por ejemplo, en otro computador):
 
 ```bash
-keytool -genkey -v -keystore ~/parte-personal-upload.jks -keyalg RSA -keysize 2048 \
-  -validity 10000 -alias upload
+keytool -genkeypair -v -keystore ~/parte-personal-upload.jks -storetype PKCS12 -alias upload \
+  -keyalg RSA -keysize 2048 -validity 10000
 ```
 
-Crea el archivo `android/keystore.properties` (ya está excluido de git; **nunca lo subas**):
+y crea `android/keystore.properties` con este formato:
 
 ```properties
 storeFile=/Users/TU_USUARIO/parte-personal-upload.jks
@@ -82,10 +93,12 @@ Resultado: `android/app/build/outputs/bundle/release/app-release.aab`.
 ## Publicar en Google Play Console
 
 1. **Crear la app** (nombre, idioma español, gratuita).
-2. **Política de privacidad**: es obligatoria. La app maneja nombres y novedades de personal;
-   debe indicar que los datos se guardan en el dispositivo y se envían directamente entre
-   dispositivos, sin servidor propio. Necesita una dirección web pública con ese texto.
-3. **Seguridad de los datos**: declara qué datos se recopilan y cómo se comparten.
+2. **Política de privacidad**: ya está redactada y publicada en la app web:
+   `https://parte-personal-pwa.vercel.app/privacidad.html` (también hay un enlace dentro de la app).
+   Muestra «Parte Personal» como responsable y `medaysanluc@gmail.com` como contacto; si quieres
+   cambiarlos, edita `public/privacidad.html` (secciones 1 y 10).
+3. **Seguridad de los datos**: las respuestas sugeridas están en `play-store/textos-y-respuestas.md`,
+   junto con la descripción, el ícono y el gráfico de funciones.
 4. **Clasificación de contenido** y **público objetivo** (adultos).
 5. **Prueba interna** (recomendado primero): sube el `.aab` en *Pruebas > Prueba interna*,
    agrega los correos de tus probadores e instala desde el enlace.

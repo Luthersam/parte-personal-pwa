@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Política de privacidad · Parte de Personal</title>
+    <meta name="description" content="Política de privacidad de la aplicación Parte de Personal." />
+    <meta name="theme-color" content="#c8a000" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      :root { color-scheme: light; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-size: 18px;
+        line-height: 1.6;
+        color: #14161a;
+        background: #eef1f6;
+      }
+      header { background: #c8a000; padding: 18px 16px; text-align: center; }
+      header h1 { margin: 0; font-size: 22px; letter-spacing: 0.3px; color: #111; }
+      header p { margin: 4px 0 0; font-size: 15px; color: rgba(0, 0, 0, 0.75); }
+      main { max-width: 760px; margin: 0 auto; padding: 20px 16px 48px; }
+      h2 { font-size: 20px; margin: 32px 0 8px; color: #243a7a; }
+      p, li { margin: 8px 0; }
+      ul { padding-left: 22px; }
+      table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 16px; background: #fff; }
+      th, td { border: 1px solid #c9ced8; padding: 8px 10px; text-align: left; vertical-align: top; }
+      th { background: #f1ecd6; }
+      mark { background: #fff1a8; padding: 0 4px; border-radius: 4px; }
+      .nota { background: #fff; border-left: 5px solid #c8a000; padding: 10px 14px; border-radius: 6px; }
+      footer { text-align: center; font-size: 15px; color: #3d4452; padding-bottom: 32px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Política de privacidad</h1>
+      <p>Aplicación «Parte de Personal»</p>
+    </header>
+
+    <main>
+      <p><strong>Última actualización:</strong> 24 de octubre de 2026</p>
+
+      <p class="nota">
+        <strong>En pocas palabras:</strong> la aplicación guarda la información en su propio dispositivo, no
+        tiene cuentas ni publicidad, y no envía los partes a ningún servidor del desarrollador. Los partes solo
+        viajan, de forma cifrada y directa, entre los celulares de quienes participan en una recepción por QR.
+      </p>
+
+      <h2>1. Quién es el responsable</h2>
+      <p>
+        La aplicación es publicada por Parte Personal
+        (en adelante, «el desarrollador»). El desarrollador <strong>no tiene acceso</strong> a los partes ni a los
+        datos que se registran en la aplicación: estos permanecen en los dispositivos de quienes la usan.
+      </p>
+      <p>
+        El tratamiento de los datos de las personas que aparecen en un parte corresponde a la entidad o unidad que
+        decide usar la aplicación y registra esa información (el «Responsable del tratamiento»). Esa entidad debe
+        contar con la autorización o el fundamento legal para tratarlos.
+      </p>
+
+      <h2>2. Qué información maneja la aplicación</h2>
+      <p>Únicamente la que el usuario escribe para elaborar el parte diario:</p>
+      <ul>
+        <li>Nombre o sigla de la unidad y de la unidad superior.</li>
+        <li>Cantidades de personal (fuerza efectiva y novedades) por categoría.</li>
+        <li>Grado y nombre de los funcionarios que tienen una novedad (comisión, permiso, vacaciones, etc.).</li>
+        <li>Grado y nombre de quien elabora el parte.</li>
+      </ul>
+      <p>
+        <strong>No se registra</strong> información de salud, diagnósticos, documentos de identidad, números de
+        teléfono, correos, ubicación, contactos, fotografías ni identificadores publicitarios. Se pide a los
+        usuarios no escribir esa información en los campos de nombres.
+      </p>
+
+      <h2>3. Dónde se guarda</h2>
+      <ul>
+        <li>
+          Los partes se guardan <strong>en el propio dispositivo</strong> (almacenamiento interno de la aplicación)
+          hasta que el usuario los borra.
+        </li>
+        <li>No existen cuentas de usuario ni una base de datos en la nube del desarrollador.</li>
+        <li>
+          En Android, las copias de seguridad automáticas de la aplicación están desactivadas, para que estos datos
+          no se suban a la nube del fabricante o de Google.
+        </li>
+      </ul>
+
+      <h2>4. Con quién se comparte</h2>
+      <p>
+        La función «Recibir por QR» permite que el coordinador reciba los partes de otras unidades. El coordinador
+        muestra un código QR válido por <strong>2 horas</strong>; cada unidad lo escanea y envía su parte, que el
+        coordinador revisa y aprueba o rechaza.
+      </p>
+      <ul>
+        <li>
+          El contenido del parte viaja <strong>directamente de un celular a otro</strong> mediante una conexión
+          cifrada (WebRTC). No pasa por un servidor del desarrollador.
+        </li>
+        <li>
+          Para establecer esa conexión se usan servicios técnicos de terceros, que reciben datos de conexión
+          (direcciones IP e identificadores temporales), <strong>pero no el contenido de los partes</strong>:
+          <table>
+            <thead>
+              <tr><th>Servicio</th><th>Para qué</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>PeerJS (0.peerjs.com)</td><td>Ayuda a que los dos celulares se encuentren.</td></tr>
+              <tr><td>Google (stun.l.google.com)</td><td>Descubre la dirección de red para la conexión directa.</td></tr>
+              <tr>
+                <td>PeerJS (servidores de retransmisión)</td>
+                <td>Retransmiten datos cifrados cuando la conexión directa no es posible.</td>
+              </tr>
+            </tbody>
+          </table>
+        </li>
+        <li>
+          Si el usuario decide <strong>compartir un reporte</strong> (por ejemplo, por WhatsApp, como texto o
+          imagen), la aplicación solo entrega el contenido al servicio que el usuario elija; desde ese momento se
+          aplican las políticas de ese servicio.
+        </li>
+        <li>
+          La versión web de la aplicación está alojada en Vercel, que puede registrar datos técnicos
+          estándar de acceso (por ejemplo, la dirección IP) al cargar la página.
+        </li>
+        <li>No se venden datos ni se usan para publicidad, análisis o perfiles.</li>
+      </ul>
+
+      <h2>5. Uso de la cámara</h2>
+      <p>
+        La cámara se utiliza <strong>únicamente para leer el código QR</strong> del coordinador. Las imágenes no se
+        guardan ni se envían a ninguna parte; la cámara se apaga al cerrar el escáner. La aplicación funciona sin
+        conceder este permiso (por ejemplo, el coordinador que solo recibe no la necesita).
+      </p>
+
+      <h2>6. Cuánto tiempo se conservan</h2>
+      <ul>
+        <li>Los partes se conservan en el dispositivo hasta que el usuario toca «Limpiar» o borra los datos de la aplicación.</li>
+        <li>Al desinstalar la aplicación se eliminan sus datos locales.</li>
+        <li>Un parte recibido por QR que el coordinador no aprueba se descarta y no se guarda.</li>
+        <li>El código QR deja de funcionar a las 2 horas o cuando el coordinador termina la recepción.</li>
+      </ul>
+
+      <h2>7. Seguridad</h2>
+      <ul>
+        <li>Conexión directa cifrada entre dispositivos.</li>
+        <li>Cada recepción usa un código aleatorio de un solo uso y vence a las 2 horas.</li>
+        <li>El coordinador valida y aprueba cada parte antes de guardarlo.</li>
+        <li>
+          La seguridad también depende del usuario: se recomienda mantener el dispositivo con bloqueo de pantalla y
+          no mostrar el QR a personas ajenas a la recepción.
+        </li>
+      </ul>
+
+      <h2>8. Derechos de los titulares de los datos</h2>
+      <p>
+        De acuerdo con la Ley 1581 de 2012 y el Decreto 1377 de 2013 (Colombia), las personas cuyos datos aparecen
+        en un parte tienen derecho a conocer, actualizar y rectificar su información, solicitar su supresión,
+        revocar la autorización y presentar quejas ante la Superintendencia de Industria y Comercio.
+      </p>
+      <p>
+        Como los datos están en los dispositivos de la entidad que elabora el parte, estas solicitudes deben
+        dirigirse a esa entidad, que puede corregirlos o eliminarlos directamente en la aplicación. Para consultas
+        sobre el funcionamiento de la aplicación, puede escribir al desarrollador (sección 10).
+      </p>
+
+      <h2>9. Menores de edad</h2>
+      <p>La aplicación es una herramienta de trabajo para adultos y no está dirigida a menores de edad.</p>
+
+      <h2>10. Contacto</h2>
+      <p>
+        Parte Personal<br />
+        Correo: <a href="mailto:medaysanluc@gmail.com">medaysanluc@gmail.com</a>
+      </p>
+
+      <h2>11. Cambios en esta política</h2>
+      <p>
+        Si cambia el tratamiento de datos, se actualizará esta página y la fecha de «Última actualización». Los
+        cambios importantes se comunicarán también al publicar una nueva versión de la aplicación.
+      </p>
+    </main>
+
+    <footer>Parte de Personal · Política de privacidad</footer>
+  </body>
+</html>

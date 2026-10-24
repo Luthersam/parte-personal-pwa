@@ -4,6 +4,7 @@ import { FormularioDetallado } from './components/FormularioDetallado';
 import { MonitorEnVivo } from './components/MonitorEnVivo';
 import { useParteStore } from './useParteStore';
 import { enviarParte } from './colecta';
+import type { FaseEnvio } from './colecta';
 import type { ParteGeonumerico } from './types';
 import { Icono } from './Icono';
 import { useBotonAtras } from './atras';
@@ -15,6 +16,7 @@ export function EnvioUnidad({ peerId, token, onVolver }: { peerId: string; token
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
   const [pendiente, setPendiente] = useState(false);
+  const [fase, setFase] = useState<FaseEnvio | null>(null);
   // Botón "atrás" de Android: vuelve al inicio (solo cuando se abrió desde la app)
   useBotonAtras(() => onVolver?.(), !!onVolver);
 
@@ -52,10 +54,16 @@ export function EnvioUnidad({ peerId, token, onVolver }: { peerId: string; token
     setPendiente(false);
     let llego = false;
     try {
-      await enviarParte(peerId, token, parte, () => {
-        llego = true;
-        setPendiente(true);
-      });
+      await enviarParte(
+        peerId,
+        token,
+        parte,
+        () => {
+          llego = true;
+          setPendiente(true);
+        },
+        setFase
+      );
       setEnviado(true);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -65,6 +73,7 @@ export function EnvioUnidad({ peerId, token, onVolver }: { peerId: string; token
     } finally {
       setEnviando(false);
       setPendiente(false);
+      setFase(null);
     }
   };
 
@@ -149,6 +158,13 @@ export function EnvioUnidad({ peerId, token, onVolver }: { peerId: string; token
             {pendiente ? 'ESPERANDO APROBACIÓN...' : enviando ? 'ENVIANDO...' : 'ENVIAR AL COORDINADOR'}
           </button>
         </div>
+        {enviando && !pendiente && fase && (
+          <p className="nota" role="status">
+            {fase === 'senal' && 'Conectando con el servicio...'}
+            {fase === 'directa' && 'Buscando al coordinador...'}
+            {fase === 'enviando' && 'Enviando el parte...'}
+          </p>
+        )}
         {pendiente && (
           <p style={{ fontSize: 16, fontWeight: 700, textAlign: 'center', margin: '0 0 16px' }}>
             El coordinador está revisando su parte. No bloquee ni cierre esta pantalla hasta que confirme.

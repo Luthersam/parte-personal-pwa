@@ -1,5 +1,5 @@
 import Peer from 'peerjs';
-import type { DataConnection } from 'peerjs';
+import type { DataConnection, PeerOptions } from 'peerjs';
 import type { NovedadesData, ParteGeonumerico } from './types';
 import { urlBase } from './nativo';
 
@@ -11,6 +11,30 @@ export const DURACION_MS = 2 * 60 * 60 * 1000;
 const MAX_MENSAJE_BYTES = 100_000;
 const MAX_NOMBRES = 300;
 const MAX_NUMERO = 99_999;
+
+// Servidores que ayudan a los celulares a encontrarse. PeerJS trae por defecto dos servidores de
+// retransmisión (TURN) que ya no existen, así que se define la lista aquí. Para redes difíciles
+// (internet compartido desde un celular, algunos operadores) hace falta un TURN real: se agrega con
+// la variable VITE_ICE_SERVERS, un JSON como
+//   [{"urls":["turn:host:3478?transport=udp","turns:host:443?transport=tcp"],"username":"...","credential":"..."}]
+const ICE_BASE: RTCIceServer[] = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun.cloudflare.com:3478' },
+];
+
+function servidoresIce(): RTCIceServer[] {
+  const extra = import.meta.env.VITE_ICE_SERVERS as string | undefined;
+  if (!extra) return ICE_BASE;
+  try {
+    const lista: unknown = JSON.parse(extra);
+    return Array.isArray(lista) ? [...ICE_BASE, ...(lista as RTCIceServer[])] : ICE_BASE;
+  } catch {
+    console.warn('VITE_ICE_SERVERS no es un JSON válido; se ignora.');
+    return ICE_BASE;
+  }
+}
+
+const opcionesPeer = (): PeerOptions => ({ config: { iceServers: servidoresIce(), iceCandidatePoolSize: 2 } });
 
 const ETIQUETAS = [
   'COMISIÓN',
@@ -108,7 +132,7 @@ export function iniciarColecta(opts: {
   const token = aleatorio(8);
   const peerId = `pp-${aleatorio(8)}`;
   const expiraEn = Date.now() + DURACION_MS;
-  const peer = new Peer(peerId);
+  const peer = new Peer(peerId, opcionesPeer());
   let cerrada = false;
 
   const cerrar = () => {
@@ -187,17 +211,35 @@ export function paramsColecta(): { peerId: string; token: string } | null {
   return paramsDeEnlace(location.href);
 }
 
+export type FaseEnvio = 'senal' | 'directa' | 'enviando';
+
+const MSG_SENAL = 'No hay acceso al servicio de conexión. Revise su internet e intente de nuevo.';
+const MSG_DIRECTA =
+  'No se pudo abrir la conexión directa con el coordinador. Si uno de los dos comparte internet desde un celular, pruebe en la misma red Wi-Fi y pida un QR nuevo.';
+const MSG_SIN_RESPUESTA = 'El coordinador no respondió a tiempo. Intente de nuevo.';
+
+function mensajeDeErrorPeer(tipo: string): string {
+  if (tipo === 'peer-unavailable') {
+    return 'No se encontró al coordinador. Verifique que tenga la recepción abierta y pídale un QR nuevo.';
+  }
+  if (['network', 'server-error', 'socket-error', 'socket-closed', 'browser-incompatible'].includes(tipo)) return MSG_SENAL;
+  return `No se pudo conectar (${tipo}). Intente de nuevo.`;
+}
+
 // Resuelve cuando el coordinador aprueba; rechaza con el motivo si lo rechaza.
 // onPendiente se llama cuando el parte llegó y espera la decisión.
+// onFase informa en qué paso va la conexión, para mostrárselo al usuario.
 export function enviarParte(
   peerId: string,
   token: string,
   parte: ParteGeonumerico,
-  onPendiente?: () => void
+  onPendiente?: () => void,
+  onFase?: (fase: FaseEnvio) => void
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    const peer = new Peer();
+    const peer = new Peer(opcionesPeer());
     let terminado = false;
+    let limite: ReturnType<typeof setTimeout>;
     const fin = (err?: Error) => {
       if (terminado) return;
       terminado = true;
@@ -206,15 +248,25 @@ export function enviarParte(
       if (err) reject(err); else resolve();
       peer.destroy();
     };
-    const limite = setTimeout(
-      () => fin(new Error('No se pudo conectar con el coordinador. Verifique que siga con la app abierta y que el QR no haya vencido.')),
-      20_000
-    );
+    // Un plazo por paso: así el error dice en cuál falló (servicio, conexión directa o respuesta)
+    const plazo = (ms: number, msg: string) => {
+      clearTimeout(limite);
+      limite = setTimeout(() => fin(new Error(msg)), ms);
+    };
 
-    peer.on('error', (e) => fin(new Error(`Conexión fallida: ${e.type}`)));
+    onFase?.('senal');
+    plazo(10_000, MSG_SENAL);
+
+    peer.on('error', (e) => fin(new Error(mensajeDeErrorPeer(e.type))));
     peer.on('open', () => {
+      onFase?.('directa');
+      plazo(25_000, MSG_DIRECTA);
       const conn = peer.connect(peerId, { reliable: true, serialization: 'json' });
-      conn.on('open', () => conn.send({ t: 'envio', token, parte } satisfies MensajeEnvio));
+      conn.on('open', () => {
+        onFase?.('enviando');
+        plazo(15_000, MSG_SIN_RESPUESTA);
+        conn.send({ t: 'envio', token, parte } satisfies MensajeEnvio);
+      });
       conn.on('data', (d) => {
         const r = d as Respuesta;
         if (r.t === 'recibido') {
