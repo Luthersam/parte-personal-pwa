@@ -44,7 +44,7 @@ export function MonitorConsolidado({ ef, novedades }: Props) {
             <td className="val-nov">{novedades.sub}</td>
           </tr>
           <tr>
-            <td>PT</td>
+            <td>PT/PP</td>
             <td className="val-ef">{ef.pt}</td>
             <td className="val-form">{disponible.pt}</td>
             <td className="val-nov">{novedades.pt}</td>

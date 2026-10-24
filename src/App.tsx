@@ -5,9 +5,13 @@ import { MonitorEnVivo } from './components/MonitorEnVivo';
 import { MonitorConsolidado } from './components/MonitorConsolidado';
 import { FormularioDetallado } from './components/FormularioDetallado';
 import { ColectaModal } from './ColectaModal';
+import { InstalarModal } from './InstalarModal';
+import { yaInstalada } from './instalar';
+import type { InstalarEvento } from './instalar';
 import { useParteStore } from './useParteStore';
 import { obtenerPartesHoy, guardarParte, borrarPartesHoy, initDB, obtenerPartePorUnidad } from './db';
 import type { ParteGeonumerico, Cuarteto, NovedadesData } from './types';
+import { Icono } from './Icono';
 
 const CATEGORIAS_LABELS = [
   'COMISIÓN',
@@ -28,6 +32,9 @@ function App() {
   const [showReporte, setShowReporte] = useState(false);
   const [showColecta, setShowColecta] = useState(false);
   const [aviso, setAviso] = useState('');
+  // Si la app no está instalada, la ventana de instalación se abre sola al entrar
+  const [showInstalar, setShowInstalar] = useState(() => !yaInstalada());
+  const [eventoInstalar, setEventoInstalar] = useState<InstalarEvento | null>(null);
 
   const cargarPartesHoy = async () => {
     try {
@@ -42,6 +49,16 @@ function App() {
     initDB()
       .catch((err) => console.error('Error iniciando BD:', err))
       .then(() => cargarPartesHoy());
+  }, []);
+
+  // Chrome en Android avisa cuando la app se puede instalar con un solo botón
+  useEffect(() => {
+    const alOfrecer = (e: Event) => {
+      e.preventDefault();
+      setEventoInstalar(e as InstalarEvento);
+    };
+    window.addEventListener('beforeinstallprompt', alOfrecer);
+    return () => window.removeEventListener('beforeinstallprompt', alOfrecer);
   }, []);
 
   useEffect(() => {
@@ -111,7 +128,7 @@ function App() {
       store.limpiar();
       await cargarPartesHoy();
       setError('');
-      setAviso(`✓ Parte de ${parte.unidadNombre.toUpperCase()} guardado`);
+      setAviso(`Parte de ${parte.unidadNombre.toUpperCase()} guardado`);
     } catch (err) {
       console.error('Error guardando:', err);
       const msg = err instanceof Error ? err.message : String(err);
@@ -159,7 +176,6 @@ function App() {
     <div className="app">
       <div className="app__header">
         <h1>PARTE DE PERSONAL</h1>
-        <p>Policía Nacional de Colombia</p>
       </div>
 
       <div className="app__content">
@@ -191,18 +207,22 @@ function App() {
 
         <div className="button-group">
           <button onClick={guardar} className="btn btn--success">
-            {esActualizacion ? '↻ ACTUALIZAR' : '✓ GUARDAR'}
+            {esActualizacion ? <Icono nombre="actualizar" /> : <Icono nombre="guardar" />}
+            {esActualizacion ? 'ACTUALIZAR' : 'GUARDAR'}
           </button>
           <button onClick={() => setShowReporte(true)} className="btn btn--primary">
-            📋 REPORTE
+            <Icono nombre="reporte" />
+            REPORTE
           </button>
           <button onClick={limpiarHoy} className="btn btn--danger">
-            🗑 LIMPIAR
+            <Icono nombre="limpiar" />
+            LIMPIAR
           </button>
         </div>
         <div className="button-group" style={{ marginTop: '6px', gridTemplateColumns: '1fr' }}>
           <button onClick={() => setShowColecta(true)} className="btn btn--primary">
-            📡 RECOLECTAR POR QR
+            <Icono nombre="qr" />
+            RECOLECTAR POR QR
           </button>
         </div>
 
@@ -224,9 +244,23 @@ function App() {
         )}
 
         <MonitorConsolidado ef={consolidado.ef} novedades={consolidado.novedades} />
+
+        {!yaInstalada() && (
+          <button className="btn-link" onClick={() => setShowInstalar(true)}>
+            <Icono nombre="descargar" />
+            ¿Cómo instalar la app en su celular?
+          </button>
+        )}
       </div>
 
-      {aviso && <div className="toast" role="status">{aviso}</div>}
+      {showInstalar && <InstalarModal evento={eventoInstalar} onClose={() => setShowInstalar(false)} />}
+
+      {aviso && (
+        <div className="toast" role="status">
+          <Icono nombre="circuloOk" />
+          {aviso}
+        </div>
+      )}
 
       {showColecta && (
         <ColectaModal
@@ -318,9 +352,9 @@ function ReporteModal({
     let texto = `*PARTE DE PERSONAL - ${unidadTitulo}*\n`;
     texto += `Fecha: ${fechaStr} ${horaStr}\n\n`;
     texto += `*RESUMEN GENERAL*\n`;
-    texto += `T. EFECTIVA:  OF ${ef.of} | SUB ${ef.sub} | PT ${ef.pt} | AXP ${ef.axp}\n`;
-    texto += `T. NOVEDADES: OF ${nov.of} | SUB ${nov.sub} | PT ${nov.pt} | AXP ${nov.axp}\n`;
-    texto += `T. DISPONIBLE: OF ${disp.of} | SUB ${disp.sub} | PT ${disp.pt} | AXP ${disp.axp}\n`;
+    texto += `T. EFECTIVA:  OF ${ef.of} | SUB ${ef.sub} | PT/PP ${ef.pt} | AXP ${ef.axp}\n`;
+    texto += `T. NOVEDADES: OF ${nov.of} | SUB ${nov.sub} | PT/PP ${nov.pt} | AXP ${nov.axp}\n`;
+    texto += `T. DISPONIBLE: OF ${disp.of} | SUB ${disp.sub} | PT/PP ${disp.pt} | AXP ${disp.axp}\n`;
 
     if (categoriasConPersonal.length > 0) {
       texto += `\n*RELACIÓN DE PERSONAL POR NOVEDAD*\n`;
@@ -341,9 +375,9 @@ function ReporteModal({
         axp: parte.ef_axp - parte.nov_total_axp,
       };
       texto += `\n${parte.unidadNombre.toUpperCase()}\n`;
-      texto += `EF: OF ${parte.ef_of} SUB ${parte.ef_sub} PT ${parte.ef_pt} AXP ${parte.ef_axp}\n`;
-      texto += `NOV: OF ${parte.nov_total_of} SUB ${parte.nov_total_sub} PT ${parte.nov_total_pt} AXP ${parte.nov_total_axp}\n`;
-      texto += `DISP: OF ${dp.of} SUB ${dp.sub} PT ${dp.pt} AXP ${dp.axp}\n`;
+      texto += `EF: OF ${parte.ef_of} SUB ${parte.ef_sub} PT/PP ${parte.ef_pt} AXP ${parte.ef_axp}\n`;
+      texto += `NOV: OF ${parte.nov_total_of} SUB ${parte.nov_total_sub} PT/PP ${parte.nov_total_pt} AXP ${parte.nov_total_axp}\n`;
+      texto += `DISP: OF ${dp.of} SUB ${dp.sub} PT/PP ${dp.pt} AXP ${dp.axp}\n`;
     }
 
     if (elaboradoPor) texto += `\n_Elaboró: ${elaboradoPor.toUpperCase()}_`;
@@ -404,9 +438,9 @@ function ReporteModal({
         {/* Header dorado */}
         <div className="reporte-modal__header">
           <div className="reporte-modal__logo-area">
-            <div className="reporte-modal__shield">🛡</div>
+            <img className="reporte-modal__shield" src="/icon-192.png" alt="" width={40} height={40} />
             <div className="reporte-modal__header-text">
-              <h2>Policía Nacional de Colombia</h2>
+              <h2>Parte de Personal</h2>
               <p>
                 REPORTE CONSOLIDADO · {padreInput || 'ADMINISTRACIÓN'}
               </p>
@@ -424,7 +458,7 @@ function ReporteModal({
             type="text"
             value={padreInput}
             onChange={(e) => setPadreInput(e.target.value.toUpperCase())}
-            placeholder="Unidad Superior (Ej. DEPU ARAUCA)"
+            placeholder="Digita aquí la sigla de tu UNIDAD"
             className="reporte-modal__unidad-input"
           />
 
@@ -436,7 +470,7 @@ function ReporteModal({
                 <th>CONCEPTO</th>
                 <th>OF</th>
                 <th>SUB</th>
-                <th>PT</th>
+                <th>PT/PP</th>
                 <th>AXP</th>
               </tr>
             </thead>
@@ -492,7 +526,7 @@ function ReporteModal({
                 <th>CONCEPTO</th>
                 <th>OF</th>
                 <th>SUB</th>
-                <th>PT</th>
+                <th>PT/PP</th>
                 <th>AXP</th>
               </tr>
             </thead>
@@ -553,16 +587,12 @@ function ReporteModal({
         <div className="reporte-modal__footer">
           <div style={{ display: 'flex', gap: '8px' }}>
             <button className="btn-whatsapp" onClick={compartirImagen} disabled={compartiendo} style={{ flex: 1 }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-              </svg>
-              {compartiendo ? 'GENERANDO...' : '📷 IMAGEN'}
+              <Icono nombre="imagen" />
+              {compartiendo ? 'GENERANDO...' : 'IMAGEN'}
             </button>
             <button className="btn-whatsapp" onClick={compartirTexto} style={{ flex: 1, background: '#128c7e' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-              </svg>
-              📝 TEXTO
+              <Icono nombre="texto" />
+              TEXTO
             </button>
           </div>
         </div>

@@ -3,6 +3,7 @@ import QRCode from 'qrcode';
 import { iniciarColecta } from './colecta';
 import type { Colecta, Decision } from './colecta';
 import type { NovedadesData, ParteGeonumerico } from './types';
+import { Icono } from './Icono';
 
 function formatoRestante(ms: number) {
   const s = Math.max(0, Math.floor(ms / 1000));
@@ -59,7 +60,7 @@ function TarjetaPendiente({
             <th></th>
             <th>OF</th>
             <th>SUB</th>
-            <th>PT</th>
+            <th>PT/PP</th>
             <th>AXP</th>
           </tr>
         </thead>
@@ -72,7 +73,7 @@ function TarjetaPendiente({
 
       {Object.entries(nov).map(([cat, d]) => (
         <div key={cat} style={{ fontSize: 14, marginTop: 8 }}>
-          <b>{cat}</b> — OF {d.of} · SUB {d.sub} · PT {d.pt} · AXP {d.axp}
+          <b>{cat}</b> — OF {d.of} · SUB {d.sub} · PT/PP {d.pt} · AXP {d.axp}
           {d.nombres.length > 0 && (
             <ul style={{ margin: '2px 0 0', paddingLeft: 18 }}>
               {d.nombres.map((n, i) => (
@@ -85,10 +86,12 @@ function TarjetaPendiente({
 
       <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
         <button className="btn btn--success" style={{ flex: 1 }} disabled={ocupado} onClick={onAprobar}>
-          ✓ APROBAR
+          <Icono nombre="guardar" />
+          APROBAR
         </button>
         <button className="btn btn--danger" style={{ flex: 1 }} disabled={ocupado} onClick={onRechazar}>
-          ✕ RECHAZAR
+          <Icono nombre="cerrar" />
+          RECHAZAR
         </button>
       </div>
     </div>
@@ -132,7 +135,7 @@ export function ColectaModal({
           resolvers.current.get(key)?.({ ok: false, msg: 'Reemplazado por un nuevo envío.' });
           resolvers.current.set(key, resolve);
           setPendientes((prev) => [...prev.filter((p) => p.unidadNombre !== key), parte]);
-          setNuevo(`📥 Nuevo parte: ${key}`);
+          setNuevo(`Nuevo parte: ${key}`);
           navigator.vibrate?.(200); // solo Android; en iPhone se ignora
         }),
       onEstado: (e, d) => {
@@ -204,7 +207,7 @@ export function ColectaModal({
       <div className="reporte-modal">
         <div className="reporte-modal__header">
           <div className="reporte-modal__logo-area">
-            <div className="reporte-modal__shield">📡</div>
+            <div className="reporte-modal__shield"><Icono nombre="qr" size={24} /></div>
             <div className="reporte-modal__header-text">
               <h2>Recolección en vivo</h2>
               <p>Las unidades escanean el QR y envían su parte</p>
@@ -215,7 +218,12 @@ export function ColectaModal({
           </button>
         </div>
 
-        {nuevo && <div className="toast" role="status">{nuevo}</div>}
+        {nuevo && (
+          <div className="toast" role="status">
+            <Icono nombre="campana" />
+            {nuevo}
+          </div>
+        )}
 
         <div className="reporte-modal__body" style={{ textAlign: 'center' }}>
           {estado === 'iniciando' && <p>Generando QR...</p>}
@@ -262,7 +270,10 @@ export function ColectaModal({
           ) : (
             <ul style={{ textAlign: 'left', fontSize: 16, fontWeight: 600, listStyle: 'none' }}>
               {aprobadas.map((u) => (
-                <li key={u}>✅ {u}</li>
+                <li key={u} className="lista-icono">
+                  <Icono nombre="circuloOk" className="icono--ok" />
+                  {u}
+                </li>
               ))}
             </ul>
           )}
@@ -272,7 +283,10 @@ export function ColectaModal({
               <div className="reporte-seccion-titulo">Rechazadas ({rechazadas.length})</div>
               <ul style={{ textAlign: 'left', fontSize: 16, fontWeight: 600, listStyle: 'none' }}>
                 {rechazadas.map((u) => (
-                  <li key={u}>❌ {u}</li>
+                  <li key={u} className="lista-icono">
+                  <Icono nombre="circuloX" className="icono--error" />
+                  {u}
+                </li>
                 ))}
               </ul>
             </>

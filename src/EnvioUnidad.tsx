@@ -5,6 +5,7 @@ import { MonitorEnVivo } from './components/MonitorEnVivo';
 import { useParteStore } from './useParteStore';
 import { enviarParte } from './colecta';
 import type { ParteGeonumerico } from './types';
+import { Icono } from './Icono';
 
 // Pantalla que ve una unidad al escanear el QR del coordinador.
 export function EnvioUnidad({ peerId, token }: { peerId: string; token: string }) {
@@ -69,11 +70,12 @@ export function EnvioUnidad({ peerId, token }: { peerId: string; token: string }
           <h1>PARTE DE PERSONAL</h1>
         </div>
         <div className="app__content" style={{ textAlign: 'center', paddingTop: 40 }}>
-          <div style={{ fontSize: 64 }}>✅</div>
+          <Icono nombre="circuloOk" size={72} className="icono--ok" />
           <h3 style={{ fontSize: 24, margin: '8px 0' }}>Parte enviado</h3>
           <p style={{ fontSize: 17, marginBottom: 20 }}>{store.store.unidadNombre.toUpperCase()} fue aprobado por el coordinador.</p>
           <button className="btn btn--primary btn--centrado" onClick={() => setEnviado(false)}>
-            ↻ CORREGIR Y REENVIAR
+            <Icono nombre="actualizar" />
+            CORREGIR Y REENVIAR
           </button>
         </div>
       </div>
@@ -86,7 +88,7 @@ export function EnvioUnidad({ peerId, token }: { peerId: string; token: string }
     <div className="app">
       <div className="app__header">
         <h1>PARTE DE PERSONAL</h1>
-        <p>Envío a coordinador · Policía Nacional de Colombia</p>
+        <p>Envío al coordinador</p>
       </div>
 
       <div className="app__content">
@@ -124,7 +126,8 @@ export function EnvioUnidad({ peerId, token }: { peerId: string; token: string }
             disabled={enviando}
             className="btn btn--success"
           >
-            {pendiente ? '⏳ ESPERANDO APROBACIÓN...' : enviando ? 'ENVIANDO...' : '📡 ENVIAR AL COORDINADOR'}
+            {pendiente ? <Icono nombre="reloj" /> : !enviando && <Icono nombre="enviar" />}
+            {pendiente ? 'ESPERANDO APROBACIÓN...' : enviando ? 'ENVIANDO...' : 'ENVIAR AL COORDINADOR'}
           </button>
         </div>
         {pendiente && (

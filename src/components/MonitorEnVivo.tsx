@@ -26,7 +26,7 @@ export function MonitorEnVivo({ ef, novedades }: Props) {
           <div className="monitor__label">EFECTIVA</div>
           <div className="monitor__value">{totalEf}</div>
           <div className="monitor__breakdown">
-            OF:{ef.of} SUB:{ef.sub} PT:{ef.pt} AXP:{ef.axp}
+            OF:{ef.of} SUB:{ef.sub} PT/PP:{ef.pt} AXP:{ef.axp}
           </div>
         </div>
 
@@ -34,7 +34,7 @@ export function MonitorEnVivo({ ef, novedades }: Props) {
           <div className="monitor__label">FORMANDO</div>
           <div className="monitor__value monitor__value--highlight">{totalDisp}</div>
           <div className="monitor__breakdown">
-            OF:{disponible.of} SUB:{disponible.sub} PT:{disponible.pt} AXP:{disponible.axp}
+            OF:{disponible.of} SUB:{disponible.sub} PT/PP:{disponible.pt} AXP:{disponible.axp}
           </div>
         </div>
 
@@ -42,7 +42,7 @@ export function MonitorEnVivo({ ef, novedades }: Props) {
           <div className="monitor__label">NOVEDADES</div>
           <div className="monitor__value monitor__value--warning">{totalNov}</div>
           <div className="monitor__breakdown">
-            OF:{novedades.of} SUB:{novedades.sub} PT:{novedades.pt} AXP:{novedades.axp}
+            OF:{novedades.of} SUB:{novedades.sub} PT/PP:{novedades.pt} AXP:{novedades.axp}
           </div>
         </div>
       </div>

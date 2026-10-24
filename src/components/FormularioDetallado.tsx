@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Cuarteto } from '../types';
 import { CajaDigito } from './CajaDigito';
+import { Icono } from '../Icono';
 
 interface Props {
   unidadNombre: string;
@@ -103,7 +104,7 @@ export function FormularioDetallado({
         <div className="formulario__grid">
           <CajaDigito label="OF" value={ef.of} onChange={(v) => onEFChange('of', v)} />
           <CajaDigito label="SUB" value={ef.sub} onChange={(v) => onEFChange('sub', v)} />
-          <CajaDigito label="PT" value={ef.pt} onChange={(v) => onEFChange('pt', v)} />
+          <CajaDigito label="PT/PP" value={ef.pt} onChange={(v) => onEFChange('pt', v)} />
           <CajaDigito label="AXP" value={ef.axp} onChange={(v) => onEFChange('axp', v)} />
         </div>
       </section>
@@ -131,6 +132,7 @@ export function FormularioDetallado({
                   </span>
                 )}
               </span>
+              <Icono nombre="chevron" size={26} className="icono--chevron" />
             </button>
 
             {abierta && (
@@ -149,7 +151,7 @@ export function FormularioDetallado({
                     max={ef.sub}
                   />
                   <CajaDigito
-                    label="PT"
+                    label="PT/PP"
                     value={cuarteto.pt}
                     onChange={(v) => onNovedadChange(id, 'pt', v)}
                     max={ef.pt}
@@ -179,7 +181,7 @@ export function FormularioDetallado({
                           onClick={() => onRemoveNombre(id, index)}
                           className="formulario__nombre-btn"
                         >
-                          ✕
+                          <Icono nombre="cerrar" size={22} />
                         </button>
                       </div>
                     ))}
@@ -205,7 +207,7 @@ export function FormularioDetallado({
                           onClick={() => agregarPendiente(id)}
                           className="formulario__nombre-btn formulario__nombre-btn--add"
                         >
-                          +
+                          <Icono nombre="mas" size={24} />
                         </button>
                       </div>
                     )}
