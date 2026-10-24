@@ -4,6 +4,7 @@ import './styles.css';
 import { MonitorEnVivo } from './components/MonitorEnVivo';
 import { MonitorConsolidado } from './components/MonitorConsolidado';
 import { FormularioDetallado } from './components/FormularioDetallado';
+import { ColectaModal } from './ColectaModal';
 import { useParteStore } from './useParteStore';
 import { obtenerPartesHoy, guardarParte, borrarPartesHoy, initDB, obtenerPartePorUnidad } from './db';
 import type { ParteGeonumerico, Cuarteto, NovedadesData } from './types';
@@ -25,6 +26,7 @@ function App() {
   const [partesHoy, setPartesHoy] = useState<ParteGeonumerico[]>([]);
   const [error, setError] = useState('');
   const [showReporte, setShowReporte] = useState(false);
+  const [showColecta, setShowColecta] = useState(false);
 
   useEffect(() => {
     initDB()
@@ -205,6 +207,11 @@ function App() {
             🗑 LIMPIAR
           </button>
         </div>
+        <div className="button-group" style={{ marginTop: '6px' }}>
+          <button onClick={() => setShowColecta(true)} className="btn btn--primary" style={{ flex: 1 }}>
+            📡 RECOLECTAR POR QR
+          </button>
+        </div>
 
         <hr className="formulario__divider" style={{ marginTop: '8px' }} />
 
@@ -238,6 +245,16 @@ function App() {
 
         <MonitorConsolidado ef={consolidado.ef} novedades={consolidado.novedades} />
       </div>
+
+      {showColecta && (
+        <ColectaModal
+          onRecibido={async (parte) => {
+            await guardarParte(parte);
+            await cargarPartesHoy();
+          }}
+          onClose={() => setShowColecta(false)}
+        />
+      )}
 
       {showReporte && (
         <ReporteModal

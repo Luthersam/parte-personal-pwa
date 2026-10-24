@@ -2,10 +2,14 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+import { EnvioUnidad } from './EnvioUnidad.tsx'
+import { paramsColecta } from './colecta.ts'
+
+const colecta = paramsColecta()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    {colecta ? <EnvioUnidad peerId={colecta.peerId} token={colecta.token} /> : <App />}
   </StrictMode>,
 )
 
