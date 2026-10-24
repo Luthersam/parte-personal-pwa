@@ -12,6 +12,7 @@ export function EnvioUnidad({ peerId, token }: { peerId: string; token: string }
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
+  const [pendiente, setPendiente] = useState(false);
 
   const enviar = async () => {
     const totales = store.obtenerTotales();
@@ -39,13 +40,20 @@ export function EnvioUnidad({ peerId, token }: { peerId: string; token: string }
 
     setError('');
     setEnviando(true);
+    setPendiente(false);
+    let llego = false;
     try {
-      await enviarParte(peerId, token, parte);
+      await enviarParte(peerId, token, parte, () => {
+        llego = true;
+        setPendiente(true);
+      });
       setEnviado(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(llego ? `El coordinador no aprobó el parte: ${msg}` : msg);
     } finally {
       setEnviando(false);
+      setPendiente(false);
     }
   };
 
@@ -58,7 +66,7 @@ export function EnvioUnidad({ peerId, token }: { peerId: string; token: string }
         <div className="app__content" style={{ textAlign: 'center', paddingTop: 40 }}>
           <div style={{ fontSize: 48 }}>✅</div>
           <h3>Parte enviado</h3>
-          <p style={{ fontSize: 13 }}>{store.store.unidadNombre.toUpperCase()} fue recibido por el coordinador.</p>
+          <p style={{ fontSize: 13 }}>{store.store.unidadNombre.toUpperCase()} fue aprobado por el coordinador.</p>
           <button className="btn btn--primary" onClick={() => setEnviado(false)}>
             ↻ CORREGIR Y REENVIAR
           </button>
@@ -120,7 +128,7 @@ export function EnvioUnidad({ peerId, token }: { peerId: string; token: string }
 
         <div className="button-group">
           <button onClick={enviar} disabled={enviando} className="btn btn--success" style={{ flex: 1 }}>
-            {enviando ? 'ENVIANDO...' : '📡 ENVIAR AL COORDINADOR'}
+            {pendiente ? '⏳ ESPERANDO APROBACIÓN...' : enviando ? 'ENVIANDO...' : '📡 ENVIAR AL COORDINADOR'}
           </button>
         </div>
       </div>

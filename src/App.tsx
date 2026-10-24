@@ -207,8 +207,8 @@ function App() {
             🗑 LIMPIAR
           </button>
         </div>
-        <div className="button-group" style={{ marginTop: '6px' }}>
-          <button onClick={() => setShowColecta(true)} className="btn btn--primary" style={{ flex: 1 }}>
+        <div className="button-group" style={{ marginTop: '6px', gridTemplateColumns: '1fr' }}>
+          <button onClick={() => setShowColecta(true)} className="btn btn--primary">
             📡 RECOLECTAR POR QR
           </button>
         </div>
@@ -248,7 +248,7 @@ function App() {
 
       {showColecta && (
         <ColectaModal
-          onRecibido={async (parte) => {
+          onAprobar={async (parte) => {
             await guardarParte(parte);
             await cargarPartesHoy();
           }}

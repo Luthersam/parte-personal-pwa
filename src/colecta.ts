@@ -24,7 +24,9 @@ const ETIQUETAS = [
 ];
 
 type MensajeEnvio = { t: 'envio'; token: string; parte: ParteGeonumerico };
-type Respuesta = { t: 'ok' } | { t: 'error'; msg: string };
+// 'recibido' = llegó y espera decisión; 'ok' = aprobado; 'error' = rechazado o inválido
+type Respuesta = { t: 'recibido' } | { t: 'ok' } | { t: 'error'; msg: string };
+export type Decision = { ok: true } | { ok: false; msg: string };
 
 function aleatorio(bytes: number): string {
   const b = crypto.getRandomValues(new Uint8Array(bytes));
@@ -97,7 +99,8 @@ export interface Colecta {
 }
 
 export function iniciarColecta(opts: {
-  onRecibido: (parte: ParteGeonumerico) => Promise<void> | void;
+  // Se resuelve cuando el coordinador aprueba o rechaza el envío
+  onRecibido: (parte: ParteGeonumerico) => Promise<Decision>;
   onEstado: (estado: 'abierta' | 'error' | 'cerrada', detalle?: string) => void;
 }): Promise<Colecta> {
   const token = aleatorio(8);
@@ -116,7 +119,10 @@ export function iniciarColecta(opts: {
   const timer = setTimeout(cerrar, DURACION_MS);
 
   peer.on('connection', (conn: DataConnection) => {
-    const responder = (r: Respuesta) => conn.send(r);
+    // La unidad puede haberse desconectado mientras esperaba la decisión
+    const responder = (r: Respuesta) => {
+      try { conn.send(r); } catch { /* conexión cerrada */ }
+    };
 
     conn.on('data', async (data) => {
       if (cerrada || Date.now() > expiraEn) return responder({ t: 'error', msg: 'La recolección ya cerró.' });
@@ -128,12 +134,14 @@ export function iniciarColecta(opts: {
       const parte = sanitizarParte(m.parte);
       if (typeof parte === 'string') return responder({ t: 'error', msg: parte });
 
+      responder({ t: 'recibido' });
+      let decision: Decision;
       try {
-        await opts.onRecibido(parte);
-        responder({ t: 'ok' });
+        decision = await opts.onRecibido(parte);
       } catch {
-        responder({ t: 'error', msg: 'No se pudo guardar en el coordinador.' });
+        decision = { ok: false, msg: 'No se pudo procesar en el coordinador.' };
       }
+      responder(decision.ok ? { t: 'ok' } : { t: 'error', msg: decision.msg });
     });
   });
 
@@ -166,13 +174,24 @@ export function paramsColecta(): { peerId: string; token: string } | null {
   return { peerId, token };
 }
 
-export function enviarParte(peerId: string, token: string, parte: ParteGeonumerico): Promise<void> {
+// Resuelve cuando el coordinador aprueba; rechaza con el motivo si lo rechaza.
+// onPendiente se llama cuando el parte llegó y espera la decisión.
+export function enviarParte(
+  peerId: string,
+  token: string,
+  parte: ParteGeonumerico,
+  onPendiente?: () => void
+): Promise<void> {
   return new Promise((resolve, reject) => {
     const peer = new Peer();
+    let terminado = false;
     const fin = (err?: Error) => {
+      if (terminado) return;
+      terminado = true;
       clearTimeout(limite);
-      peer.destroy();
+      // Resolver antes de destruir: destroy() dispara 'close', que no debe contarse como error
       if (err) reject(err); else resolve();
+      peer.destroy();
     };
     const limite = setTimeout(
       () => fin(new Error('No se pudo conectar con el coordinador. Verifique que siga con la app abierta y que el QR no haya vencido.')),
@@ -185,9 +204,13 @@ export function enviarParte(peerId: string, token: string, parte: ParteGeonumeri
       conn.on('open', () => conn.send({ t: 'envio', token, parte } satisfies MensajeEnvio));
       conn.on('data', (d) => {
         const r = d as Respuesta;
-        if (r.t === 'ok') fin();
-        else fin(new Error(r.msg));
+        if (r.t === 'recibido') {
+          clearTimeout(limite); // ya llegó: la decisión puede tardar
+          onPendiente?.();
+        } else if (r.t === 'ok') fin();
+        else if (r.t === 'error') fin(new Error(r.msg));
       });
+      conn.on('close', () => fin(new Error('Se perdió la conexión con el coordinador. Reenvíe el parte.')));
       conn.on('error', (e) => fin(e));
     });
   });

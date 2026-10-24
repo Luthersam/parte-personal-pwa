@@ -477,6 +477,8 @@ body {
   font-size: 12px;
   margin-bottom: 14px;
   font-family: inherit;
+  background: #fff;
+  color: #111;
 }
 
 /* Sección: título */
@@ -605,6 +607,12 @@ body {
   text-align: left;
   color: #555;
   font-size: 8px;
+}
+
+/* td:first-child (arriba) pisaba el color del encabezado de unidad: texto gris sobre fondo oscuro */
+.reporte-tabla-desglose td.desglose-unidad-header:first-child {
+  color: #fff;
+  text-align: center;
 }
 
 .reporte-tabla-desglose tr.row-disponible-desglose {
