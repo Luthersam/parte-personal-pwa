@@ -27,12 +27,19 @@ function App() {
   const [error, setError] = useState('');
   const [showReporte, setShowReporte] = useState(false);
   const [showColecta, setShowColecta] = useState(false);
+  const [aviso, setAviso] = useState('');
 
   useEffect(() => {
     initDB()
       .catch((err) => console.error('Error iniciando BD:', err))
       .then(() => cargarPartesHoy());
   }, []);
+
+  useEffect(() => {
+    if (!aviso) return;
+    const id = setTimeout(() => setAviso(''), 3500);
+    return () => clearTimeout(id);
+  }, [aviso]);
 
   const cargarPartesHoy = async () => {
     try {
@@ -104,6 +111,7 @@ function App() {
       store.limpiar();
       await cargarPartesHoy();
       setError('');
+      setAviso(`✓ Parte de ${parte.unidadNombre.toUpperCase()} guardado`);
     } catch (err) {
       console.error('Error guardando:', err);
       const msg = err instanceof Error ? err.message : String(err);
@@ -151,28 +159,13 @@ function App() {
     <div className="app">
       <div className="app__header">
         <h1>PARTE DE PERSONAL</h1>
-        <p style={{ fontSize: '10px', margin: '1px 0 0', color: 'rgba(0,0,0,0.65)' }}>
-          Policía Nacional de Colombia
-        </p>
+        <p>Policía Nacional de Colombia</p>
       </div>
 
       <div className="app__content">
         <MonitorEnVivo ef={store.store.ef} novedades={totales.novedades} />
 
-        {error && (
-          <div
-            style={{
-              background: 'rgba(255,0,0,0.15)',
-              padding: '8px 12px',
-              borderRadius: '4px',
-              marginBottom: '10px',
-              color: '#ff6666',
-              fontSize: '12px',
-            }}
-          >
-            {error}
-          </div>
-        )}
+        {error && <div className="aviso-error">{error}</div>}
 
         <FormularioDetallado
           unidadNombre={store.store.unidadNombre}
@@ -213,28 +206,15 @@ function App() {
           </button>
         </div>
 
-        <hr className="formulario__divider" style={{ marginTop: '8px' }} />
-
         {partesHoy.length > 0 && (
-          <div style={{ marginTop: '12px' }}>
-            <h3 style={{ fontSize: '11px', fontWeight: 700, marginBottom: '8px', color: '#c8a000' }}>
-              UNIDADES REGISTRADAS HOY
-            </h3>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div>
+            <h3 className="unidades-titulo">Unidades registradas hoy (toque para editar)</h3>
+            <div className="unidades-lista">
               {partesHoy.map((parte) => (
                 <button
                   key={parte.id}
                   onClick={() => cargarParaEditar(parte.unidadNombre)}
-                  style={{
-                    padding: '8px 12px',
-                    background: 'rgba(200,160,0,0.2)',
-                    border: '1px solid rgba(200,160,0,0.3)',
-                    borderRadius: '6px',
-                    color: '#c8a000',
-                    cursor: 'pointer',
-                    fontSize: '10px',
-                    fontWeight: 600,
-                  }}
+                  className="chip-unidad"
                 >
                   {parte.unidadNombre}
                 </button>
@@ -245,6 +225,8 @@ function App() {
 
         <MonitorConsolidado ef={consolidado.ef} novedades={consolidado.novedades} />
       </div>
+
+      {aviso && <div className="toast" role="status">{aviso}</div>}
 
       {showColecta && (
         <ColectaModal

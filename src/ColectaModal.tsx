@@ -50,8 +50,8 @@ function TarjetaPendiente({
 
   return (
     <div style={{ border: '2px solid #c8a000', borderRadius: 8, padding: 10, margin: '8px 0', textAlign: 'left' }}>
-      <div style={{ fontWeight: 700, fontSize: 14 }}>{parte.unidadNombre}</div>
-      {parte.elaboradoPor && <div style={{ fontSize: 11, color: '#666' }}>Elaboró: {parte.elaboradoPor.toUpperCase()}</div>}
+      <div style={{ fontWeight: 800, fontSize: 18 }}>{parte.unidadNombre}</div>
+      {parte.elaboradoPor && <div style={{ fontSize: 14, color: '#444' }}>Elaboró: {parte.elaboradoPor.toUpperCase()}</div>}
 
       <table className="reporte-tabla-resumen" style={{ marginTop: 6 }}>
         <thead>
@@ -71,7 +71,7 @@ function TarjetaPendiente({
       </table>
 
       {Object.entries(nov).map(([cat, d]) => (
-        <div key={cat} style={{ fontSize: 12, marginTop: 6 }}>
+        <div key={cat} style={{ fontSize: 14, marginTop: 8 }}>
           <b>{cat}</b> — OF {d.of} · SUB {d.sub} · PT {d.pt} · AXP {d.axp}
           {d.nombres.length > 0 && (
             <ul style={{ margin: '2px 0 0', paddingLeft: 18 }}>
@@ -111,6 +111,7 @@ export function ColectaModal({
   const [ocupado, setOcupado] = useState(false);
   const [errorGuardar, setErrorGuardar] = useState('');
   const [restante, setRestante] = useState(0);
+  const [nuevo, setNuevo] = useState('');
   const colectaRef = useRef<Colecta | null>(null);
   const resolvers = useRef(new Map<string, (d: Decision) => void>());
   const onAprobarRef = useRef(onAprobar);
@@ -128,6 +129,8 @@ export function ColectaModal({
           resolvers.current.get(key)?.({ ok: false, msg: 'Reemplazado por un nuevo envío.' });
           resolvers.current.set(key, resolve);
           setPendientes((prev) => [...prev.filter((p) => p.unidadNombre !== key), parte]);
+          setNuevo(`📥 Nuevo parte: ${key}`);
+          navigator.vibrate?.(200); // solo Android; en iPhone se ignora
         }),
       onEstado: (e, d) => {
         setEstado(e);
@@ -150,6 +153,12 @@ export function ColectaModal({
       wake?.release().catch(() => {});
     };
   }, []);
+
+  useEffect(() => {
+    if (!nuevo) return;
+    const id = setTimeout(() => setNuevo(''), 4000);
+    return () => clearTimeout(id);
+  }, [nuevo]);
 
   useEffect(() => {
     const c = colectaRef.current;
@@ -203,11 +212,13 @@ export function ColectaModal({
           </button>
         </div>
 
+        {nuevo && <div className="toast" role="status">{nuevo}</div>}
+
         <div className="reporte-modal__body" style={{ textAlign: 'center' }}>
           {estado === 'iniciando' && <p>Generando QR...</p>}
 
           {estado === 'error' && (
-            <p style={{ color: '#c00', fontSize: 13 }}>
+            <p style={{ color: '#b3261e', fontSize: 16, fontWeight: 700 }}>
               No se pudo abrir la recolección: {detalle || 'sin conexión'}. Verifique su internet.
             </p>
           )}
@@ -217,7 +228,7 @@ export function ColectaModal({
           {pendientes.length > 0 && (
             <>
               <div className="reporte-seccion-titulo">Por aprobar ({pendientes.length})</div>
-              {errorGuardar && <p style={{ color: '#c00', fontSize: 12 }}>{errorGuardar}</p>}
+              {errorGuardar && <p style={{ color: '#b3261e', fontSize: 15, fontWeight: 700 }}>{errorGuardar}</p>}
               {pendientes.map((p) => (
                 <TarjetaPendiente
                   key={p.unidadNombre}
@@ -233,10 +244,10 @@ export function ColectaModal({
           {estado === 'abierta' && qr && (
             <>
               <img src={qr} alt="QR de recolección" width={pendientes.length ? 160 : 280} height={pendientes.length ? 160 : 280} style={{ maxWidth: '100%' }} />
-              <p style={{ fontSize: 13, margin: '8px 0' }}>
+              <p style={{ fontSize: 18, margin: '8px 0' }}>
                 Vence en <b>{formatoRestante(restante)}</b>
               </p>
-              <p style={{ fontSize: 11, color: '#666', margin: 0 }}>
+              <p style={{ fontSize: 14, color: '#444', margin: 0 }}>
                 Mantenga esta pantalla abierta mientras las unidades envían.
               </p>
             </>
@@ -244,9 +255,9 @@ export function ColectaModal({
 
           <div className="reporte-seccion-titulo">Aprobadas ({aprobadas.length})</div>
           {aprobadas.length === 0 ? (
-            <p style={{ fontSize: 12, color: '#666' }}>Aún no hay partes aprobados.</p>
+            <p style={{ fontSize: 15, color: '#444' }}>Aún no hay partes aprobados.</p>
           ) : (
-            <ul style={{ textAlign: 'left', fontSize: 13 }}>
+            <ul style={{ textAlign: 'left', fontSize: 16, fontWeight: 600, listStyle: 'none' }}>
               {aprobadas.map((u) => (
                 <li key={u}>✅ {u}</li>
               ))}
@@ -256,7 +267,7 @@ export function ColectaModal({
           {rechazadas.length > 0 && (
             <>
               <div className="reporte-seccion-titulo">Rechazadas ({rechazadas.length})</div>
-              <ul style={{ textAlign: 'left', fontSize: 13 }}>
+              <ul style={{ textAlign: 'left', fontSize: 16, fontWeight: 600, listStyle: 'none' }}>
                 {rechazadas.map((u) => (
                   <li key={u}>❌ {u}</li>
                 ))}

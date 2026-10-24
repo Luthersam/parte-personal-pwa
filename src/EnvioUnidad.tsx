@@ -64,9 +64,9 @@ export function EnvioUnidad({ peerId, token }: { peerId: string; token: string }
           <h1>PARTE DE PERSONAL</h1>
         </div>
         <div className="app__content" style={{ textAlign: 'center', paddingTop: 40 }}>
-          <div style={{ fontSize: 48 }}>✅</div>
-          <h3>Parte enviado</h3>
-          <p style={{ fontSize: 13 }}>{store.store.unidadNombre.toUpperCase()} fue aprobado por el coordinador.</p>
+          <div style={{ fontSize: 64 }}>✅</div>
+          <h3 style={{ fontSize: 24, margin: '8px 0' }}>Parte enviado</h3>
+          <p style={{ fontSize: 17, marginBottom: 20 }}>{store.store.unidadNombre.toUpperCase()} fue aprobado por el coordinador.</p>
           <button className="btn btn--primary" onClick={() => setEnviado(false)}>
             ↻ CORREGIR Y REENVIAR
           </button>
@@ -81,28 +81,13 @@ export function EnvioUnidad({ peerId, token }: { peerId: string; token: string }
     <div className="app">
       <div className="app__header">
         <h1>PARTE DE PERSONAL</h1>
-        <p style={{ fontSize: '10px', margin: '1px 0 0', color: 'rgba(0,0,0,0.65)' }}>
-          Envío a coordinador · Policía Nacional de Colombia
-        </p>
+        <p>Envío a coordinador · Policía Nacional de Colombia</p>
       </div>
 
       <div className="app__content">
         <MonitorEnVivo ef={store.store.ef} novedades={totales.novedades} />
 
-        {error && (
-          <div
-            style={{
-              background: 'rgba(255,0,0,0.15)',
-              padding: '8px 12px',
-              borderRadius: '4px',
-              marginBottom: '10px',
-              color: '#ff6666',
-              fontSize: '12px',
-            }}
-          >
-            {error}
-          </div>
-        )}
+        {error && <div className="aviso-error">{error}</div>}
 
         <FormularioDetallado
           unidadNombre={store.store.unidadNombre}
@@ -127,7 +112,7 @@ export function EnvioUnidad({ peerId, token }: { peerId: string; token: string }
         />
 
         <div className="button-group">
-          <button onClick={enviar} disabled={enviando} className="btn btn--success" style={{ flex: 1 }}>
+          <button onClick={enviar} disabled={enviando} className="btn btn--success">
             {pendiente ? '⏳ ESPERANDO APROBACIÓN...' : enviando ? 'ENVIANDO...' : '📡 ENVIAR AL COORDINADOR'}
           </button>
         </div>

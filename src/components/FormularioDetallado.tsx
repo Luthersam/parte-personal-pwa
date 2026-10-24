@@ -31,6 +31,8 @@ const CATEGORIAS = [
   { id: 'per', label: 'PERMISO' },
   { id: 'vac', label: 'VACACIONES' },
   { id: 'ser', label: 'SERVICIOS' },
+  { id: 'ret', label: 'RETARDADO' },
+  { id: 'hor', label: 'HORARIO FLEXIBLE' },
   { id: 'otr', label: 'OTROS' },
 ];
 
@@ -44,6 +46,8 @@ export function FormularioDetallado({
   permiso,
   vacaciones,
   servicios,
+  retardado,
+  horarioFlexible,
   otros,
   nombresDict,
   onUnidadChange,
@@ -63,46 +67,73 @@ export function FormularioDetallado({
     per: permiso,
     vac: vacaciones,
     ser: servicios,
+    ret: retardado,
+    hor: horarioFlexible,
     otr: otros,
+  };
+
+  // Agrega el nombre escrito (si hay). Se usa con "+", Enter y al salir del campo,
+  // para no perder un nombre escrito si se guarda sin tocar "+".
+  const agregarPendiente = (id: string) => {
+    const nombre = (newNombre[id] || '').trim();
+    if (!nombre) return;
+    onAddNombre(id, nombre);
+    setNewNombre((prev) => ({ ...prev, [id]: '' }));
   };
 
   return (
     <div className="formulario">
-      <input
-        type="text"
-        placeholder="NOMBRE UNIDAD (Ej. CAI CENTRO)"
-        value={unidadNombre}
-        onChange={(e) => onUnidadChange(e.target.value)}
-        className="formulario__input formulario__input--full"
-      />
+      <div>
+        <label className="formulario__label" htmlFor="unidad-nombre">
+          Nombre de la unidad
+        </label>
+        <input
+          id="unidad-nombre"
+          type="text"
+          placeholder="Ej. CAI CENTRO"
+          autoCapitalize="characters"
+          value={unidadNombre}
+          onChange={(e) => onUnidadChange(e.target.value)}
+          className="formulario__input formulario__input--full"
+        />
+      </div>
 
-      <fieldset className="formulario__section">
-        <legend className="formulario__legend">1. FUERZA EFECTIVA</legend>
+      <section className="formulario__section">
+        <div className="formulario__legend formulario__legend--static">1. FUERZA EFECTIVA</div>
         <div className="formulario__grid">
           <CajaDigito label="OF" value={ef.of} onChange={(v) => onEFChange('of', v)} />
           <CajaDigito label="SUB" value={ef.sub} onChange={(v) => onEFChange('sub', v)} />
           <CajaDigito label="PT" value={ef.pt} onChange={(v) => onEFChange('pt', v)} />
           <CajaDigito label="AXP" value={ef.axp} onChange={(v) => onEFChange('axp', v)} />
         </div>
-      </fieldset>
-
-      <hr className="formulario__divider" />
+      </section>
 
       {CATEGORIAS.map(({ id, label }) => {
         const cuarteto = cuartetosMap[id];
         const nombres = nombresDict[id] || [];
         const total = cuarteto.of + cuarteto.sub + cuarteto.pt + cuarteto.axp;
+        const faltan = total - nombres.length;
+        const abierta = expandedCategory === id;
 
         return (
-          <fieldset key={id} className="formulario__section">
-            <legend
-              className="formulario__legend formulario__legend--collapsible"
-              onClick={() => setExpandedCategory(expandedCategory === id ? null : id)}
+          <section key={id} className="formulario__section">
+            <button
+              type="button"
+              aria-expanded={abierta}
+              className={`formulario__legend formulario__legend--collapsible${abierta ? ' formulario__legend--open' : ''}`}
+              onClick={() => setExpandedCategory(abierta ? null : id)}
             >
-              {label} ({total})
-            </legend>
+              <span>
+                {label} ({total})
+                {total > 0 && faltan > 0 && (
+                  <span className="formulario__legend-extra">
+                    Faltan {faltan} {faltan === 1 ? 'nombre' : 'nombres'}
+                  </span>
+                )}
+              </span>
+            </button>
 
-            {expandedCategory === id && (
+            {abierta && (
               <div className="formulario__content">
                 <div className="formulario__grid">
                   <CajaDigito
@@ -139,9 +170,12 @@ export function FormularioDetallado({
                           type="text"
                           value={nombre}
                           readOnly
+                          aria-label={`Funcionario ${index + 1}`}
                           className="formulario__nombre-input"
                         />
                         <button
+                          type="button"
+                          aria-label={`Quitar ${nombre}`}
                           onClick={() => onRemoveNombre(id, index)}
                           className="formulario__nombre-btn"
                         >
@@ -154,25 +188,22 @@ export function FormularioDetallado({
                       <div className="formulario__nombre-item">
                         <input
                           type="text"
-                          placeholder="Nombre funcionario"
+                          placeholder="Grado y nombre del funcionario"
+                          aria-label="Nombre del funcionario"
+                          autoCapitalize="characters"
                           value={newNombre[id] || ''}
                           onChange={(e) => setNewNombre({ ...newNombre, [id]: e.target.value })}
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter' && newNombre[id]) {
-                              onAddNombre(id, newNombre[id]);
-                              setNewNombre({ ...newNombre, [id]: '' });
-                            }
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') agregarPendiente(id);
                           }}
+                          onBlur={() => agregarPendiente(id)}
                           className="formulario__nombre-input"
                         />
                         <button
-                          onClick={() => {
-                            if (newNombre[id]) {
-                              onAddNombre(id, newNombre[id]);
-                              setNewNombre({ ...newNombre, [id]: '' });
-                            }
-                          }}
-                          className="formulario__nombre-btn"
+                          type="button"
+                          aria-label="Agregar funcionario"
+                          onClick={() => agregarPendiente(id)}
+                          className="formulario__nombre-btn formulario__nombre-btn--add"
                         >
                           +
                         </button>
@@ -182,19 +213,23 @@ export function FormularioDetallado({
                 )}
               </div>
             )}
-          </fieldset>
+          </section>
         );
       })}
 
-      <hr className="formulario__divider" />
-
-      <input
-        type="text"
-        placeholder="ELABORADO POR: (Grado y Nombres)"
-        value={elaboradoPor}
-        onChange={(e) => onElaboradoPorChange(e.target.value)}
-        className="formulario__input formulario__input--full"
-      />
+      <div>
+        <label className="formulario__label" htmlFor="elaborado-por">
+          Elaborado por
+        </label>
+        <input
+          id="elaborado-por"
+          type="text"
+          placeholder="Grado y nombres"
+          value={elaboradoPor}
+          onChange={(e) => onElaboradoPorChange(e.target.value)}
+          className="formulario__input formulario__input--full"
+        />
+      </div>
     </div>
   );
 }
