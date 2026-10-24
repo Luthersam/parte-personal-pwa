@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './styles.css';
 import { FormularioDetallado } from './components/FormularioDetallado';
 import { MonitorEnVivo } from './components/MonitorEnVivo';
@@ -13,6 +13,11 @@ export function EnvioUnidad({ peerId, token }: { peerId: string; token: string }
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
   const [pendiente, setPendiente] = useState(false);
+
+  // Al terminar, volver arriba: si no, el aviso queda tapado por la barra del navegador
+  useEffect(() => {
+    if (enviado) window.scrollTo(0, 0);
+  }, [enviado]);
 
   const enviar = async () => {
     const totales = store.obtenerTotales();
@@ -67,7 +72,7 @@ export function EnvioUnidad({ peerId, token }: { peerId: string; token: string }
           <div style={{ fontSize: 64 }}>✅</div>
           <h3 style={{ fontSize: 24, margin: '8px 0' }}>Parte enviado</h3>
           <p style={{ fontSize: 17, marginBottom: 20 }}>{store.store.unidadNombre.toUpperCase()} fue aprobado por el coordinador.</p>
-          <button className="btn btn--primary" onClick={() => setEnviado(false)}>
+          <button className="btn btn--primary btn--centrado" onClick={() => setEnviado(false)}>
             ↻ CORREGIR Y REENVIAR
           </button>
         </div>
@@ -112,10 +117,21 @@ export function EnvioUnidad({ peerId, token }: { peerId: string; token: string }
         />
 
         <div className="button-group">
-          <button onClick={enviar} disabled={enviando} className="btn btn--success">
+          {/* key: al cambiar de estado se crea un botón nuevo, sin restos del texto anterior */}
+          <button
+            key={pendiente ? 'pendiente' : enviando ? 'enviando' : 'listo'}
+            onClick={enviar}
+            disabled={enviando}
+            className="btn btn--success"
+          >
             {pendiente ? '⏳ ESPERANDO APROBACIÓN...' : enviando ? 'ENVIANDO...' : '📡 ENVIAR AL COORDINADOR'}
           </button>
         </div>
+        {pendiente && (
+          <p style={{ fontSize: 16, fontWeight: 700, textAlign: 'center', margin: '0 0 16px' }}>
+            El coordinador está revisando su parte. No bloquee ni cierre esta pantalla hasta que confirme.
+          </p>
+        )}
       </div>
     </div>
   );

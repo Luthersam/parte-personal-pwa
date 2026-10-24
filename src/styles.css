@@ -482,18 +482,26 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: opacity 0.2s;
   text-transform: uppercase;
   letter-spacing: 0.3px;
   box-shadow: 0 4px 14px rgba(31, 41, 80, 0.2);
+}
+
+/* Botón suelto que debe quedar centrado (un botón con display:flex no se centra solo) */
+.btn--centrado {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .btn:active {
   opacity: 0.8;
 }
 
+/* Deshabilitado con color sólido, sin opacidad: en Safari de iPhone la opacidad dejaba
+   el texto anterior dibujado debajo del nuevo (texto doble) al cambiar de estado */
 .btn:disabled {
-  opacity: 0.55;
+  background: #5d6675;
+  box-shadow: none;
 }
 
 .btn--success {
@@ -892,7 +900,7 @@ body {
 }
 
 .btn-whatsapp:disabled {
-  opacity: 0.6;
+  background: #5d6675;
 }
 
 /* === RESPONSIVE === */
