@@ -39,10 +39,10 @@ Privacidad: no hay cuentas ni publicidad. Los partes se guardan en su dispositiv
 |---|---|---|
 | Ícono (512×512) | `play-store/icono-512x512.png` | Listo |
 | Gráfico de funciones (1024×500) | `play-store/grafico-de-funciones-1024x500.png` | Listo |
-| Capturas de pantalla del teléfono (mín. 2, máx. 8) | `play-store/capturas/` (5 archivos, 1080×2100) | Listas |
+| Capturas de pantalla del teléfono (mín. 2, máx. 8) | `play-store/capturas/` (5 archivos, 1080×1920 (9:16)) | Listas |
 
 **Capturas:** salen del emulador de Android con datos ficticios (unidades y nombres inventados), recortadas a
-1080×2100 para cumplir el límite de Google (el lado largo no puede superar el doble del corto).
+1080×1920 (9:16), que es una de las proporciones que pide Google (16:9 o 9:16).
 Orden sugerido: formulario, novedades con nombres, consolidado, reporte y recibir por QR.
 
 ## Seguridad de los datos (formulario de Play Console)

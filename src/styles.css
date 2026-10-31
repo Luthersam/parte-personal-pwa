@@ -747,6 +747,60 @@ body {
   display: inline-block;
 }
 
+/* === CÓDIGOS QR SIN INTERNET === */
+.codigos {
+  text-align: center;
+  padding: 16px 0 24px;
+}
+
+.codigos__titulo {
+  font-size: 22px;
+  margin: 0 0 6px;
+  color: var(--color-text);
+}
+
+.codigos__instruccion {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+  margin: 0 0 14px;
+}
+
+.codigos__marco {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 340px);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto 10px;
+  background: #fff;
+  border: 2px solid var(--field-border);
+  border-radius: var(--radius);
+}
+
+.codigos__marco img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius);
+}
+
+.codigos__contador {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 6px 0 12px;
+}
+
+.codigos__controles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.codigos__final {
+  width: 100%;
+}
+
 /* === AVISOS === */
 .aviso-error {
   background: #fde7e5;

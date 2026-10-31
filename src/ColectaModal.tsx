@@ -24,7 +24,7 @@ function novedadesDe(parte: ParteGeonumerico): NovedadesData {
   }
 }
 
-function TarjetaPendiente({
+export function TarjetaPendiente({
   parte,
   onAprobar,
   onRechazar,

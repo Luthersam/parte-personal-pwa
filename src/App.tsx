@@ -9,6 +9,8 @@ import { InstalarModal } from './InstalarModal';
 import { useBotonAtras } from './atras';
 import { URL_PRIVACIDAD } from './nativo';
 import { EscanerModal } from './EscanerModal';
+import { EnvioSinInternet } from './EnvioSinInternet';
+import { ColectaSinInternetModal } from './ColectaSinInternetModal';
 import { EnvioUnidad } from './EnvioUnidad';
 import { yaInstalada, esAndroid, esIOS } from './instalar';
 import type { InstalarEvento } from './instalar';
@@ -39,6 +41,8 @@ function App() {
   const [showEscaner, setShowEscaner] = useState(false);
   // Datos de conexión leídos del QR del coordinador: muestra el formulario de envío dentro de la app
   const [envio, setEnvio] = useState<{ peerId: string; token: string } | null>(null);
+  const [showEnvioOffline, setShowEnvioOffline] = useState(false);
+  const [showColectaOffline, setShowColectaOffline] = useState(false);
   // Si la app no está instalada, la ventana de instalación se abre sola al entrar
   const [showInstalar, setShowInstalar] = useState(() => !yaInstalada());
   const [eventoInstalar, setEventoInstalar] = useState<InstalarEvento | null>(null);
@@ -191,6 +195,10 @@ function App() {
     return <EnvioUnidad peerId={envio.peerId} token={envio.token} onVolver={() => setEnvio(null)} />;
   }
 
+  if (showEnvioOffline) {
+    return <EnvioSinInternet onVolver={() => setShowEnvioOffline(false)} />;
+  }
+
   return (
     <div className="app">
       <div className="app__header">
@@ -242,6 +250,16 @@ function App() {
           <button onClick={() => setShowColecta(true)} className="btn btn--primary">
             <Icono nombre="qr" />
             RECIBIR POR QR
+          </button>
+        </div>
+        <div className="button-group" style={{ marginTop: '0', gridTemplateColumns: '1fr 1fr' }}>
+          <button onClick={() => setShowColectaOffline(true)} className="btn btn--primary">
+            <Icono nombre="qr" />
+            RECIBIR SIN INTERNET
+          </button>
+          <button onClick={() => setShowEnvioOffline(true)} className="btn btn--primary">
+            <Icono nombre="escanear" />
+            ENVIAR SIN INTERNET
           </button>
         </div>
         {esAndroid() && (
@@ -308,6 +326,16 @@ function App() {
           <Icono nombre="circuloOk" />
           {aviso}
         </div>
+      )}
+
+      {showColectaOffline && (
+        <ColectaSinInternetModal
+          onAprobar={async (parte) => {
+            await guardarParte(parte);
+            await cargarPartesHoy();
+          }}
+          onClose={() => setShowColectaOffline(false)}
+        />
       )}
 
       {showColecta && (
